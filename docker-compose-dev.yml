@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  api-node:
+    image: "api-node"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: dev
+    init: true
+    ports:
+      - "4323:4323"
+    depends_on:
+      - db
+    volumes:
+      - type: bind
+        source: ./
+        target: /usr/src/app
+      - type: volume
+        target: /usr/src/app/node_modules
+    env_file:
+      - .env
+    environment:
+      - MONGO_URL=${MONGO_URL}
+    restart: unless-stopped
+
+  db:
+    image: mongo:8-noble
+    ports:
+      - "27018:27017"
+    env_file:
+      - .env
+    environment:
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
