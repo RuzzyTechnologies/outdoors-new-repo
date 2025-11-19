@@ -22,6 +22,9 @@ services:
       - .env
     environment:
       - MONGO_URL=${MONGO_URL}
+      - ARGON_MEMORY_COST=${ARGON_MEMORY_COST}
+      - ARGON_TIME_COST=${ARGON_TIME_COST}
+      - ARGON_PARALLELISM=${ARGON_PARALLELISM}
     restart: unless-stopped
 
   db:
