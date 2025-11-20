@@ -58,6 +58,7 @@ export class AdminService implements AdminService {
       logger.info("User successfully logged in...");
       return { admin, token };
     } catch (e: any) {
+      if (e instanceof NotFound) throw e;
       logger.error("Error logging admin in...", e);
       throw new InternalServerError(`Error logging admin in... ${e}`);
     }
@@ -65,9 +66,9 @@ export class AdminService implements AdminService {
 
   async logout(req: any) {
     try {
-      req.user.tokens = req.user.tokens.filter((token: any) => {
-        token.token !== req.token;
-      });
+      req.user.tokens = req.user.tokens.filter(
+        (token: any) => token.token !== req.token
+      );
 
       await req.user.save();
       logger.info("User successfully logged out...");

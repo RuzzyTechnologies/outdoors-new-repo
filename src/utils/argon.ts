@@ -11,6 +11,9 @@ export function hashPassword(password: string) {
   return argon2.hash(password, argonConfig);
 }
 
-export function verifyPassword(hashedPassword: string, password: string) {
+export default function verifyPassword(
+  hashedPassword: string,
+  password: string
+) {
   return argon2.verify(hashedPassword, password);
 }

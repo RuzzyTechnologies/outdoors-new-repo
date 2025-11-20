@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
 import { isEmail } from "validator";
 import jwt from "jsonwebtoken";
-
-import { hashPassword, verifyPassword } from "../utils/argon";
+import verifyPassword, { hashPassword } from "../utils/argon";
 const { Schema } = mongoose;
 
 import {
