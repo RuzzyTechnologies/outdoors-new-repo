@@ -5,16 +5,22 @@ import { logger } from "../utils/logger";
 import { ObjectId } from "mongodb";
 
 export class AdminService implements AdminService {
+  private adminRepository;
+
+  constructor() {
+    this.adminRepository = Admin;
+  }
+
   async createAdmin(payload: adminOptions) {
     try {
       const { firstName, lastName, username, email, password } = payload;
 
-      const findExistingEmail = await Admin.findOne({ email });
+      const findExistingEmail = await this.adminRepository.findOne({ email });
 
       if (findExistingEmail)
         throw new Conflict("An administrator with this email already exists");
 
-      const findExistingUsername = await Admin.findOne({
+      const findExistingUsername = await this.adminRepository.findOne({
         username,
       });
 
@@ -23,7 +29,7 @@ export class AdminService implements AdminService {
           "An administrator with this username already exists"
         );
 
-      const admin = new Admin({
+      const admin = new this.adminRepository({
         firstName,
         lastName,
         username,
@@ -32,10 +38,10 @@ export class AdminService implements AdminService {
       });
       await admin.save();
 
-      // logger.info("Admin created...");
+      logger.info("Admin created...");
     } catch (e: any) {
       if (e instanceof Conflict) throw e;
-      // logger.error("Error creating admin");
+      logger.error("Error creating admin");
       throw new InternalServerError(`Error creating admin, ${e}`);
     }
   }
@@ -43,7 +49,7 @@ export class AdminService implements AdminService {
   async login(payload: loginOptions) {
     try {
       const { email, loginPassword } = payload;
-      const admin = await Admin.findByCredentials({
+      const admin = await this.adminRepository.findByCredentials({
         email,
         loginPassword,
       });
@@ -86,7 +92,7 @@ export class AdminService implements AdminService {
   async updateAdminInfo(id: string, payload: adminUpdateFields) {
     try {
       const _id = new ObjectId(String(id));
-      const admin = await Admin.findOneAndUpdate(_id, payload, {
+      const admin = await this.adminRepository.findOneAndUpdate(_id, payload, {
         new: true,
         runValidators: true,
       });
@@ -105,7 +111,7 @@ export class AdminService implements AdminService {
   async updatePassword(id: string, password: string) {
     try {
       const _id = new ObjectId(String(id));
-      const admin = await Admin.findOneAndUpdate(
+      const admin = await this.adminRepository.findOneAndUpdate(
         _id,
         { password },
         {
@@ -128,7 +134,7 @@ export class AdminService implements AdminService {
   async deleteAdmin(id: string) {
     try {
       const _id = new ObjectId(String(id));
-      const admin = await Admin.findByIdAndDelete(_id);
+      const admin = await this.adminRepository.findByIdAndDelete(_id);
       if (!admin) throw new NotFound(`Admin doesn't exist`);
 
       logger.info("Admin successfully deleted");

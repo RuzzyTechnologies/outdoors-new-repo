@@ -3,8 +3,10 @@ import { Admin } from "../src/models/admin";
 import { Conflict, InternalServerError } from "../src/utils/error";
 
 jest.mock("../src/utils/logger", () => ({
-  info: jest.fn(),
-  error: jest.fn(),
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+  },
 }));
 
 jest.mock("../src/models/admin", () => {
@@ -21,7 +23,7 @@ jest.mock("../src/models/admin", () => {
   return { Admin: mockAdmin };
 });
 
-describe("AdminService - create", () => {
+describe("AdminService", () => {
   let adminService: AdminService;
 
   beforeEach(() => {
@@ -30,7 +32,8 @@ describe("AdminService - create", () => {
   });
 
   test("should throw confict if email already exists", () => {
-    (Admin.findOne as jest.Mock).mockResolvedValueOnce({});
+    const admin = Admin.findOne as jest.Mock;
+    admin.mockResolvedValueOnce({});
 
     const payload = {
       firstName: "Sam",
@@ -44,9 +47,8 @@ describe("AdminService - create", () => {
   });
 
   test("shoud throw conflict if username already exists", () => {
-    (Admin.findOne as jest.Mock)
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({});
+    const admin = Admin.findOne as jest.Mock;
+    admin.mockResolvedValue(null).mockResolvedValue({});
 
     const payload = {
       firstName: "Sam",
@@ -60,9 +62,8 @@ describe("AdminService - create", () => {
   });
 
   test("should create admin when valid", async () => {
-    (Admin.findOne as jest.Mock)
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(null);
+    const admin = Admin.findOne as jest.Mock;
+    admin.mockResolvedValue(null).mockResolvedValue(null);
 
     const saveMock = jest.fn().mockResolvedValue({});
     (Admin.prototype.save as jest.Mock) = saveMock;
