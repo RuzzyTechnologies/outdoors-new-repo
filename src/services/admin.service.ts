@@ -55,7 +55,7 @@ export class AdminService implements AdminService {
       });
       const token = await admin.generateAuthToken();
 
-      logger.info("User successfully logged in...");
+      logger.info("Admin successfully logged in...");
       return { admin, token };
     } catch (e: any) {
       if (e instanceof NotFound) throw e;
@@ -66,12 +66,12 @@ export class AdminService implements AdminService {
 
   async logout(req: any) {
     try {
-      req.user.tokens = req.user.tokens.filter(
+      req.admin.tokens = req.admin.tokens.filter(
         (token: any) => token.token !== req.token
       );
 
-      await req.user.save();
-      logger.info("User successfully logged out...");
+      await req.admin.save();
+      logger.info("Admin successfully logged out...");
     } catch (e: any) {
       logger.error("Error logging admin out...");
       throw new InternalServerError(`Error logging admin out...${e}`);
@@ -80,10 +80,10 @@ export class AdminService implements AdminService {
 
   async logoutFromAllDevices(req: any) {
     try {
-      req.user.tokens = [];
+      req.admin.tokens = [];
 
-      await req.user.save();
-      logger.info("User successfully logged out...");
+      await req.admin.save();
+      logger.info("Admin successfully logged out...");
     } catch (e: any) {
       logger.error("Error logging admin out...");
       throw new InternalServerError(`Error logging admin out...${e}`);
@@ -145,6 +145,17 @@ export class AdminService implements AdminService {
 
       logger.error(`Error deleting admin...`);
       throw new InternalServerError(`Error deleting admin...${e}`);
+    }
+  }
+
+  async getSpecificAdmin(id: string) {
+    try {
+      const _id = new ObjectId(id);
+      const admin = await this.adminRepository.findOne({ _id });
+      if (!admin) throw new NotFound("Admin does not exist");
+      return admin;
+    } catch (e) {
+      throw e;
     }
   }
 

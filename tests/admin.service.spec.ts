@@ -251,9 +251,9 @@ describe("AdminService", () => {
     const admin = Admin.findByIdAndDelete as jest.Mock;
     admin.mockResolvedValue(mockAdmin);
 
-    const update = await adminService.deleteAdmin(id);
+    const deleteOperation = await adminService.deleteAdmin(id);
 
-    expect(update).toEqual(mockAdmin);
+    expect(deleteOperation).toEqual(mockAdmin);
     expect(ObjectId).toHaveBeenCalled();
   });
 });

@@ -12,9 +12,8 @@ import {
   ERR_FIRSTNAME_REQUIRED,
   ERR_USERNAME_REQUIRED,
 } from "../utils/reusables.js";
-import { loginOptions } from "../types.js";
 import { NotFound } from "../utils/error.js";
-import type { AdminDocument, AdminModel } from "../types.js";
+import type { loginOptions, AdminDocument, AdminModel } from "../types";
 
 const adminSchema = new Schema(
   {
@@ -51,7 +50,6 @@ const adminSchema = new Schema(
       {
         token: {
           type: String,
-          required: true,
         },
       },
     ],
@@ -75,34 +73,41 @@ adminSchema.methods.toJSON = function () {
 
   delete userObject.password;
   delete userObject.tokens;
-  delete userObject.avatar;
 
   return userObject;
 };
 
 adminSchema.methods.generateAuthToken = async function () {
-  const token = jwt.sign(
-    { _id: this._id.toString(), username: this.username },
-    process.env.JWT_SECRET as string,
-    {
-      expiresIn: process.env.JWT_EXPIRES_IN as any,
-    }
-  );
-  this.tokens = this.tokens.concat({ token });
-  await this.save();
-  return token;
+  try {
+    const token = jwt.sign(
+      { _id: this._id.toString(), username: this.username },
+      process.env.JWT_SECRET as string,
+      {
+        expiresIn: process.env.JWT_EXPIRES_IN as any,
+      }
+    );
+    this.tokens = this.tokens.concat({ token });
+    await this.save();
+    return token;
+  } catch (e) {
+    throw e;
+  }
 };
 
 adminSchema.statics.findByCredentials = async (payload: loginOptions) => {
-  const { email, loginPassword } = payload;
-  const admin = await Admin.findOne({ email });
+  try {
+    const { email, loginPassword } = payload;
+    const admin = await Admin.findOne({ email });
 
-  if (!admin) throw new NotFound("Wrong email/password combination");
+    if (!admin) throw new NotFound("Wrong email/password combination");
 
-  const isMatch = verifyPassword(admin.password, loginPassword);
-  if (!isMatch) throw new NotFound("Wrong email/password combination");
+    const isMatch = verifyPassword(admin.password, loginPassword);
+    if (!isMatch) throw new NotFound("Wrong email/password combination");
 
-  return admin;
+    return admin;
+  } catch (e) {
+    throw e;
+  }
 };
 
 export const Admin = mongoose.model<AdminDocument, AdminModel>(
