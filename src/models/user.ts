@@ -4,10 +4,7 @@ import { phone } from "phone";
 import jwt from "jsonwebtoken";
 import verifyPassword, { hashPassword } from "../utils/argon";
 import type { loginOptions } from "../types";
-import { NotFound } from "../utils/error.js";
-
-const { Schema } = mongoose;
-const isValid = phone;
+import { NotFound } from "../utils/error";
 
 import {
   ERR_COMPANY_REQUIRED,
@@ -16,8 +13,11 @@ import {
   ERR_FULLNAME_REQUIRED,
   ERR_PHONE_REQUIRED,
   ERR_PWORD_REQUIRED,
-} from "../utils/reusables.js";
+} from "../utils/reusables";
 import { UserDocument, UserModel } from "../types";
+
+const { Schema } = mongoose;
+const isValid = phone;
 
 const userSchema = new Schema(
   {
@@ -93,20 +93,16 @@ userSchema.methods.toJSON = function () {
 };
 
 userSchema.methods.generateAuthToken = async function () {
-  try {
-    const token = jwt.sign(
-      { _id: this._id.toString(), username: this.email },
-      process.env.JWT_SECRET as string,
-      {
-        expiresIn: process.env.JWT_EXPIRES_IN as any,
-      }
-    );
-    this.tokens = this.tokens.concat({ token });
-    await this.save();
-    return token;
-  } catch (e) {
-    throw e;
-  }
+  const token = jwt.sign(
+    { _id: this._id.toString(), username: this.email },
+    process.env.JWT_SECRET as string,
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN as any,
+    }
+  );
+  this.tokens = this.tokens.concat({ token });
+  await this.save();
+  return token;
 };
 
 userSchema.statics.findByCredentials = async (payload: loginOptions) => {
@@ -116,7 +112,7 @@ userSchema.statics.findByCredentials = async (payload: loginOptions) => {
 
     if (!user) throw new NotFound("Wrong email/password combination");
 
-    const isMatch = verifyPassword(user.password, loginPassword);
+    const isMatch = await verifyPassword(user.password, loginPassword);
     if (!isMatch) throw new NotFound("Wrong email/password combination");
 
     return user;

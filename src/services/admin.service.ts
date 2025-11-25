@@ -37,8 +37,8 @@ export class AdminService implements AdminService {
         password,
       });
       await admin.save();
-
       logger.info("Admin created...");
+      return admin;
     } catch (e: any) {
       if (e instanceof Conflict) throw e;
       logger.error("Error creating admin");
@@ -53,6 +53,9 @@ export class AdminService implements AdminService {
         email,
         loginPassword,
       });
+      if (!admin) {
+        throw new NotFound("Wrong email/password combination");
+      }
       const token = await admin.generateAuthToken();
 
       logger.info("Admin successfully logged in...");

@@ -100,7 +100,7 @@ adminSchema.statics.findByCredentials = async (payload: loginOptions) => {
 
     if (!admin) throw new NotFound("Wrong email/password combination");
 
-    const isMatch = verifyPassword(admin.password, loginPassword);
+    const isMatch = await verifyPassword(admin.password, loginPassword);
     if (!isMatch) throw new NotFound("Wrong email/password combination");
 
     return admin;

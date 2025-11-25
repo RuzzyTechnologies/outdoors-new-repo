@@ -32,6 +32,8 @@ export class UserService implements UserService {
         position,
       });
       await user.save();
+      logger.info("Admin created...");
+      return user;
     } catch (e: any) {
       if (e instanceof Conflict) throw e;
       logger.error("Error creating user");
@@ -46,6 +48,9 @@ export class UserService implements UserService {
         email,
         loginPassword,
       });
+      if (!user) {
+        throw new NotFound("Wrong email/password combination");
+      }
       const token = await user.generateAuthToken();
 
       logger.info("User successfully logged in...");
@@ -152,6 +157,7 @@ export class UserService implements UserService {
       }
 
       const newUrl = await this.upload(file, publicId);
+
       await user.updateOne(
         {
           avatar: newUrl,
