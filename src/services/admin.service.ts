@@ -81,7 +81,6 @@ export class AdminService implements AdminService {
   async logoutFromAllDevices(req: any) {
     try {
       req.admin.tokens = [];
-
       await req.admin.save();
       logger.info("Admin successfully logged out...");
     } catch (e: any) {
@@ -155,6 +154,7 @@ export class AdminService implements AdminService {
       if (!admin) throw new NotFound("Admin does not exist");
       return admin;
     } catch (e) {
+      logger.error(`Error fetching admin...`);
       throw e;
     }
   }

@@ -2,8 +2,6 @@ import mongoose from "mongoose";
 import { isEmail } from "validator";
 import jwt from "jsonwebtoken";
 import verifyPassword, { hashPassword } from "../utils/argon";
-const { Schema } = mongoose;
-
 import {
   ERR_EMAIL_EXISTS,
   ERR_EMAIL_REQUIRED,
@@ -11,10 +9,11 @@ import {
   ERR_LASTNAME_REQUIRED,
   ERR_FIRSTNAME_REQUIRED,
   ERR_USERNAME_REQUIRED,
-} from "../utils/reusables.js";
-import { NotFound } from "../utils/error.js";
+} from "../utils/reusables";
+import { NotFound } from "../utils/error";
 import type { loginOptions, AdminDocument, AdminModel } from "../types";
 
+const { Schema } = mongoose;
 const adminSchema = new Schema(
   {
     firstName: {

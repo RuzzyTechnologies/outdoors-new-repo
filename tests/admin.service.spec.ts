@@ -150,7 +150,7 @@ describe("AdminService", () => {
 
     const req = {
       token: "token-123",
-      user: {
+      admin: {
         tokens: [{ token: "token-123" }, { token: "token34343" }],
         save: mockSave,
       },
@@ -158,7 +158,7 @@ describe("AdminService", () => {
 
     await adminService.logout(req);
 
-    expect(req.user.tokens).toEqual([{ token: "token34343" }]);
+    expect(req.admin.tokens).toEqual([{ token: "token34343" }]);
     expect(mockSave).toHaveBeenCalled();
   });
 
@@ -167,7 +167,7 @@ describe("AdminService", () => {
 
     const req = {
       token: "token-123",
-      user: {
+      admin: {
         tokens: [{ token: "token-123" }, { token: "token34343" }],
         save: mockSave,
       },
@@ -175,7 +175,7 @@ describe("AdminService", () => {
 
     await adminService.logoutFromAllDevices(req);
 
-    expect(req.user.tokens).toEqual([]);
+    expect(req.admin.tokens).toEqual([]);
     expect(mockSave).toHaveBeenCalled();
   });
 
@@ -254,6 +254,28 @@ describe("AdminService", () => {
     const deleteOperation = await adminService.deleteAdmin(id);
 
     expect(deleteOperation).toEqual(mockAdmin);
+    expect(ObjectId).toHaveBeenCalled();
+  });
+  test("Should throw a NOTFOUND error if not found (getSpecificAdmin)", async () => {
+    const admin = Admin.findOne as jest.Mock;
+    admin.mockResolvedValueOnce(null);
+
+    const id = "12345rtt67543";
+
+    await expect(adminService.getSpecificAdmin(id)).rejects.toThrow(NotFound);
+    expect(ObjectId).toHaveBeenCalled();
+  });
+
+  test("Should return a specific user if found.", async () => {
+    const id = "12345rtt67543";
+    const mockValue = { _id: id, firstName: "John" };
+
+    const admin = Admin.findOne as jest.Mock;
+    admin.mockResolvedValueOnce(mockValue);
+
+    const getSpecificAdmin = await adminService.getSpecificAdmin(id);
+
+    expect(getSpecificAdmin).toEqual(mockValue);
     expect(ObjectId).toHaveBeenCalled();
   });
 });
