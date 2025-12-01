@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
-import { LocationDocument, LocationModel } from "../types";
+import {
+  AreaDocument,
+  AreaModel,
+  LocationDocument,
+  LocationModel,
+} from "../types";
 const { Schema } = mongoose;
 
 const areaSchema = new Schema(
@@ -7,10 +12,22 @@ const areaSchema = new Schema(
     stateArea: {
       type: String,
       trim: true,
+      required: true,
+    },
+    location: {
+      type: Schema.Types.ObjectId,
+      ref: "State",
+      required: true,
     },
   },
-  { _id: false }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
+
+export const Area = mongoose.model<AreaDocument, AreaModel>("Area", areaSchema);
 
 const stateSchema = new Schema(
   {
@@ -19,17 +36,6 @@ const stateSchema = new Schema(
       trim: true,
       required: true,
     },
-    totalAreas: {
-      type: Number,
-      trim: true,
-      default: 0,
-    },
-    area: [
-      {
-        type: areaSchema,
-        default: () => ({}),
-      },
-    ],
   },
   {
     timestamps: true,

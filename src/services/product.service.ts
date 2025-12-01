@@ -11,48 +11,35 @@ import type {
   ProductDocument,
 } from "../types";
 import { uploadMiddleware } from "../middleware/multer";
+import { LocationService } from "./location.service";
 
 export class ProductService implements PS {
   private productRepository;
-  private locationRepository;
+  private locationService;
 
   constructor() {
     this.productRepository = Product;
-    this.locationRepository = State;
+    this.locationService = new LocationService();
   }
 
   async createProduct(
     id: string,
     payload: productPayload,
-    locationDetails: locationPayload,
-    img?: image
+    locationDetails: locationPayload
   ) {
     try {
-      const {
-        title,
-        category,
-        size,
-        quantity,
-        availability,
-        description,
-        featured,
-        address,
-      } = payload;
+      const { stateName, stateArea } = locationDetails;
+
+      const state = await this.locationService.getState(stateName);
+      const area = await this.locationService.getArea(stateArea);
 
       const _id = new ObjectId(id);
-      const locale = await this.createLocation(locationDetails);
+
       const product = new this.productRepository({
-        title,
-        category,
-        availability,
-        description,
-        quantity,
-        featured,
-        size,
+        ...payload,
         owner: _id,
-        location: locale._id,
-        address,
-        image: img,
+        state: state._id,
+        area: area._id,
       });
       await product.save();
       logger.info("Product created...");
@@ -60,49 +47,6 @@ export class ProductService implements PS {
     } catch (e: any) {
       logger.error(`Error creating product...${e}`);
       throw new InternalServerError(`Eror creating product...${e}`);
-    }
-  }
-
-  async createLocation(location: locationPayload) {
-    try {
-      let state;
-
-      const { stateName, stateArea } = location;
-
-      state = await this.locationRepository.findOne({
-        stateName,
-      });
-      if (!state) {
-        state = new this.locationRepository({
-          stateName,
-        });
-        await state.save();
-      }
-
-      const area = await this.locationRepository.findOne({
-        stateName,
-        "area.stateArea": stateArea,
-      });
-
-      if (!area) {
-        const updateOps: any = {};
-
-        updateOps.$inc = { totalAreas: 1 };
-        updateOps.$addToSet = { "area.stateArea": stateArea };
-
-        const locale = await this.locationRepository.findOneAndUpdate(
-          {
-            stateName,
-          },
-          updateOps,
-          { new: true, runValidators: true }
-        );
-        return locale as LocationDocument;
-      }
-      return area as LocationDocument;
-    } catch (e: any) {
-      logger.error(`Error creating location...${e}`);
-      throw new InternalServerError(`Eror creating location...${e}`);
     }
   }
 
@@ -187,12 +131,12 @@ export class ProductService implements PS {
         .skip(skip)
         .limit(lim);
 
-      if (!products) throw new NotFound(`Product not found`);
+      if (!products) throw new NotFound(`No product found`);
       return { products, total, page };
     } catch (e: any) {
-      logger.error("Product fetch unsuccessful!");
+      logger.error("Error fetching products");
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Product fetch unsuccessful!, ${e}`);
+      throw new InternalServerError(`Error fetching products, ${e}`);
     }
   }
 
@@ -233,21 +177,39 @@ export class ProductService implements PS {
     }
   }
 
-  async getProductByState(id: string, locationId: string) {
+  async getProductsByState(state: string) {
     try {
+      const location = await this.locationService.getState(state);
+
+      const products = await this.productRepository.find({
+        state: location._id,
+      });
+
+      if (!products) throw new NotFound(`No product found!`);
+      return products;
     } catch (e) {
-      logger.error("Product updation unsuccessful!");
+      logger.error("Error fetching product!");
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Product updation unsuccessful!, ${e}`);
+      throw new InternalServerError(`Error fetching product!, ${e}`);
     }
   }
 
-  async getProductByArea(id: string, locationId: string) {
+  async getProductsByArea(areaName: string, stateName: string) {
     try {
+      const area = await this.locationService.getArea(areaName);
+      const state = await this.locationService.getState(stateName);
+
+      const products = await this.productRepository.find({
+        area: area._id,
+        state: state._id,
+      });
+
+      if (!products) throw new NotFound(`No product found!`);
+      return products;
     } catch (e) {
-      logger.error("Product updation unsuccessful!");
+      logger.error("Error fetching product!");
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Product updation unsuccessful!, ${e}`);
+      throw new InternalServerError(`Error fetching product!, ${e}`);
     }
   }
 }

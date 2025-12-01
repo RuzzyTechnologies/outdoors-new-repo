@@ -36,9 +36,14 @@ const productSchema = new Schema(
       trim: true,
       required: true,
     },
-    location: {
+    state: {
       type: Schema.Types.ObjectId,
       ref: "Location",
+      required: true,
+    },
+    area: {
+      type: Schema.Types.ObjectId,
+      ref: "Area",
       required: true,
     },
     address: {

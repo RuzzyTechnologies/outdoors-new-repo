@@ -154,7 +154,8 @@ export interface ProductDocument extends Document {
   availability: boolean;
   description: string;
   size: string;
-  location: string;
+  state: ObjectId;
+  area: ObjectId;
   address: string;
   image: image;
   featured: boolean;
@@ -173,24 +174,11 @@ export interface ProductService {
     location: locationPayload,
     img?: image
   ): Promise<ProductDocument>;
-  createLocation(
-    location: location,
-    locationArea: area
-  ): Promise<LocationDocument>;
   uploadImage(
     id: string,
     file: Express.Multer.File
   ): Promise<{
     product: ProductDocument;
-    url: string;
-  }>;
-  upload(
-    file: Express.Multer.File,
-    oldImage?: string | null
-  ): Promise<{
-    fileName: string;
-    size: number;
-    mimetype: string;
     url: string;
   }>;
   getSpecificProduct(id: string): Promise<ProductDocument>;
@@ -200,8 +188,11 @@ export interface ProductService {
   ): Promise<{ products: ProductDocument[]; total: number; page: number }>;
   updateProduct(id: string, payload: productPayload): Promise<ProductDocument>;
   deleteProduct(id: string): Promise<ProductDocument>;
-  getProductByState(id: string, locationId: string): Promise<ProductDocument>;
-  getProductByArea(id: string, locationId: string): Promise<ProductDocument>;
+  getProductsByState(state: string): Promise<ProductDocument[]>;
+  getProductsByArea(
+    areaName: string,
+    stateName: string
+  ): Promise<ProductDocument[]>;
 }
 
 type Category =
@@ -256,6 +247,21 @@ export type locationPayload = {
 
 export interface LocationDocument extends Document {
   stateName: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AreaDocument extends Document {
+  stateArea: string;
+  location: ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AreaModel extends Model<AreaDocument> {}
+
+export interface LocationDocument extends Document {
+  stateName: string;
   area: area[];
   totalAreas: number;
   createdAt: Date;
@@ -263,3 +269,5 @@ export interface LocationDocument extends Document {
 }
 
 export interface LocationModel extends Model<LocationDocument> {}
+
+export interface LocationService {}
