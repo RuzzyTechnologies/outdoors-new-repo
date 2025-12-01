@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-import { documentSchema } from "./manageBillboard.js";
+import { documentSchema } from "./manageBillboard";
 import {
   ERR_DESCRIPTION_REQUIRED,
   PRODUCT_CATEGORY,
 } from "../utils/reusables.js";
+import { ProductDocument, ProductModel } from "../types.js";
 
 const productSchema = new Schema(
   {
@@ -23,7 +24,7 @@ const productSchema = new Schema(
     availability: {
       type: Boolean,
       required: true,
-      default: false,
+      default: true,
     },
     description: {
       type: String,
@@ -35,10 +36,14 @@ const productSchema = new Schema(
       trim: true,
       required: true,
     },
-    localtion: {
+    location: {
+      type: Schema.Types.ObjectId,
+      ref: "Location",
+      required: true,
+    },
+    address: {
       type: String,
       trim: true,
-      required: true,
     },
     image: {
       type: documentSchema,
@@ -46,6 +51,10 @@ const productSchema = new Schema(
     featured: {
       type: Boolean,
       default: false,
+    },
+    quantity: {
+      type: String,
+      trim: true,
     },
     owner: {
       type: Schema.Types.ObjectId,
@@ -60,4 +69,7 @@ const productSchema = new Schema(
   }
 );
 
-export const Product = mongoose.model("Product", productSchema);
+export const Product = mongoose.model<ProductDocument, ProductModel>(
+  "Product",
+  productSchema
+);

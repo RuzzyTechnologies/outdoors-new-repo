@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
+import { LocationDocument, LocationModel } from "../types";
 const { Schema } = mongoose;
 
 const areaSchema = new Schema(
   {
-    name: {
+    stateArea: {
       type: String,
       trim: true,
     },
@@ -13,7 +14,7 @@ const areaSchema = new Schema(
 
 const stateSchema = new Schema(
   {
-    name: {
+    stateName: {
       type: String,
       trim: true,
       required: true,
@@ -23,15 +24,12 @@ const stateSchema = new Schema(
       trim: true,
       default: 0,
     },
-    area: {
-      type: areaSchema,
-      default: () => ({}),
-    },
-    owner: {
-      type: Schema.Types.ObjectId,
-      ref: "Admin",
-      required: true,
-    },
+    area: [
+      {
+        type: areaSchema,
+        default: () => ({}),
+      },
+    ],
   },
   {
     timestamps: true,
@@ -40,4 +38,7 @@ const stateSchema = new Schema(
   }
 );
 
-export const State = mongoose.model("State", stateSchema);
+export const State = mongoose.model<LocationDocument, LocationModel>(
+  "State",
+  stateSchema
+);

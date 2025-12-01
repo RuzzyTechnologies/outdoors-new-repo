@@ -1,16 +1,18 @@
 import { Document, Model } from "mongoose";
-import { Admin } from "./models/admin.js";
-import { User } from "./models/user.js";
+import { ObjectId } from "mongodb";
 
 /** ADMIN */
 
 export interface AdminService {
-  createAdmin: (payload: adminOptions) => Promise<admin>;
+  createAdmin: (payload: adminOptions) => Promise<AdminDocument>;
   login: (payload: loginOptions) => Promise<tokenizedAdmin>;
-  logout: (payload: any) => Promise<admin>;
-  updateAdminInfo: (id: string, paylaod: adminUpdateFields) => Promise<admin>;
-  updatePassword: (id: string, password: string) => Promise<admin>;
-  deleteAdmin: (id: string) => Promise<admin>;
+  logout: (payload: any) => Promise<void>;
+  updateAdminInfo: (
+    id: string,
+    paylaod: adminUpdateFields
+  ) => Promise<AdminDocument>;
+  updatePassword: (id: string, password: string) => Promise<AdminDocument>;
+  deleteAdmin: (id: string) => Promise<AdminDocument>;
   createOTP: () => Promise<string>;
   verifyOTP: () => Promise<boolean>;
 }
@@ -27,10 +29,8 @@ export type loginOptions = {
   loginPassword: string;
 };
 
-type admin = typeof Admin;
-
 type tokenizedAdmin = {
-  admin: admin;
+  admin: AdminDocument;
   token: string;
 };
 
@@ -69,8 +69,13 @@ export type userOptions = {
 };
 
 type tokenizedUser = {
-  admin: admin;
+  user: UserDocument;
   token: string;
+};
+
+type avatarUser = {
+  user: UserDocument;
+  newUrl: string;
 };
 
 export type userUpdateFields = {
@@ -80,15 +85,19 @@ export type userUpdateFields = {
   position?: string;
 };
 
-type user = typeof User;
-
 export interface UserService {
-  createAdmin: (payload: userOptions) => Promise<user>;
+  createUser: (payload: userOptions) => Promise<UserDocument>;
   login: (payload: loginOptions) => Promise<tokenizedUser>;
-  logout: (payload: any) => Promise<user>;
-  updateUserInfo: (id: string, paylaod: adminUpdateFields) => Promise<user>;
-  updatePassword: (id: string, password: string) => Promise<user>;
-  deleteAdmin: (id: string) => Promise<user>;
+  logout: (payload: any) => Promise<void>;
+  logoutFromAllDevices: (payload: any) => Promise<void>;
+  updateUserInfo: (
+    id: string,
+    paylaod: userUpdateFields
+  ) => Promise<UserDocument>;
+  updatePassword: (id: string, password: string) => Promise<UserDocument>;
+  deleteUser: (id: string) => Promise<UserDocument>;
+  getSpecificUser: (id: string) => Promise<UserDocument>;
+  uploadAvatar: (id: string, file: Express.Multer.File) => Promise<avatarUser>;
   createOTP: () => Promise<string>;
   verifyOTP: () => Promise<boolean>;
 }
@@ -110,10 +119,147 @@ export interface UserDocument extends Document {
 }
 
 export interface UserModel extends Model<UserDocument> {
-  findByCredentials(payload: loginOptions): Promise<AdminDocument>;
+  findByCredentials(payload: loginOptions): Promise<UserDocument>;
 }
 
 export interface CustomParams {
   folder: string;
   allowedFormats: string[];
 }
+
+/** PRODUCT */
+
+export type image = {
+  name: string;
+  url: string;
+  uploadedAt: Date;
+  mimetype: string;
+  size: number;
+};
+
+export type productPayload = {
+  title: string;
+  category: string;
+  availability: boolean;
+  description: string;
+  quantity: string;
+  featured: boolean;
+  size: string;
+  address: string;
+};
+
+export interface ProductDocument extends Document {
+  title: string;
+  category: Category;
+  availability: boolean;
+  description: string;
+  size: string;
+  location: string;
+  address: string;
+  image: image;
+  featured: boolean;
+  quantity: string;
+  owner: ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ProductModel extends Model<ProductDocument> {}
+
+export interface ProductService {
+  createProduct(
+    id: string,
+    payload: productPayload,
+    location: locationPayload,
+    img?: image
+  ): Promise<ProductDocument>;
+  createLocation(
+    location: location,
+    locationArea: area
+  ): Promise<LocationDocument>;
+  uploadImage(
+    id: string,
+    file: Express.Multer.File
+  ): Promise<{
+    product: ProductDocument;
+    url: string;
+  }>;
+  upload(
+    file: Express.Multer.File,
+    oldImage?: string | null
+  ): Promise<{
+    fileName: string;
+    size: number;
+    mimetype: string;
+    url: string;
+  }>;
+  getSpecificProduct(id: string): Promise<ProductDocument>;
+  getAllProducts(
+    pages: number,
+    limit: number
+  ): Promise<{ products: ProductDocument[]; total: number; page: number }>;
+  updateProduct(id: string, payload: productPayload): Promise<ProductDocument>;
+  deleteProduct(id: string): Promise<ProductDocument>;
+  getProductByState(id: string, locationId: string): Promise<ProductDocument>;
+  getProductByArea(id: string, locationId: string): Promise<ProductDocument>;
+}
+
+type Category =
+  | "All"
+  | "Unipole"
+  | "Gantry"
+  | "LED Billboard"
+  | "Wall Drape"
+  | "Lamp Post"
+  | "Roof Top"
+  | "Trivision/Ultrawave"
+  | "Portrait"
+  | "Backlit/Landscape"
+  | "Bridge Panel"
+  | "Mega Billboard"
+  | "Long Banner"
+  | "Sign Board"
+  | "Mobile Bill Board"
+  | "Large Format"
+  | "Glass Panel"
+  | "48 Sheet"
+  | "BRT"
+  | "Bulletin Board"
+  | "Arc Flag"
+  | "Ultra wave billboard"
+  | "Frontlit Billboard"
+  | "Building Wrap"
+  | "Car park roof Gantry"
+  | "Car Display"
+  | "Airport digital signage"
+  | "Tower Branding"
+  | "Led Lamp post billboard"
+  | "Portrait Led billboard"
+  | "Revolving Portrait Billboard"
+  | "Unipole LED Billboard"
+  | "96 Sheet Billboard"
+  | "Static Light Box Lamp Post Billboard";
+
+/**LOCATION */
+export type location = {
+  stateName: string;
+};
+
+export type area = {
+  stateArea: string;
+};
+
+export type locationPayload = {
+  stateArea: string;
+  stateName: string;
+};
+
+export interface LocationDocument extends Document {
+  stateName: string;
+  area: area[];
+  totalAreas: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface LocationModel extends Model<LocationDocument> {}
