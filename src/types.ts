@@ -185,14 +185,22 @@ export interface ProductService {
   getAllProducts(
     pages: number,
     limit: number
-  ): Promise<{ products: ProductDocument[]; total: number; page: number }>;
+  ): Promise<{
+    products: ProductDocument[];
+    totalPages: number;
+    page: number;
+  }>;
   updateProduct(id: string, payload: productPayload): Promise<ProductDocument>;
   deleteProduct(id: string): Promise<ProductDocument>;
-  getProductsByState(state: string): Promise<ProductDocument[]>;
+  getProductsByState(
+    state: string,
+    page: number,
+    limit: number
+  ): Promise<{ products: ProductDocument[]; totalPages: number; page: number }>;
   getProductsByArea(
     areaName: string,
     stateName: string
-  ): Promise<ProductDocument[]>;
+  ): Promise<{ products: ProductDocument[]; totalPages: number; page: number }>;
 }
 
 type Category =
@@ -262,12 +270,28 @@ export interface AreaModel extends Model<AreaDocument> {}
 
 export interface LocationDocument extends Document {
   stateName: string;
-  area: area[];
-  totalAreas: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface LocationModel extends Model<LocationDocument> {}
 
-export interface LocationService {}
+export interface LocationService {
+  createState(location: locationPayload): Promise<LocationDocument>;
+  createArea(location: locationPayload): Promise<AreaDocument>;
+  getState(state: string): Promise<LocationDocument>;
+  getArea(area: string): Promise<AreaDocument>;
+  getAllStates(
+    pages: number,
+    limit: number
+  ): Promise<{
+    states: LocationDocument;
+    total: number;
+    page: number;
+  }>;
+  getAllAreasInASpecificState(
+    stateName: string,
+    pages: number,
+    limit: number
+  ): Promise<{ areas: AreaDocument; total: number; page: number }>;
+}

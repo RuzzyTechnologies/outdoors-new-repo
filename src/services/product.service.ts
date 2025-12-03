@@ -1,15 +1,9 @@
 import { Product } from "../models/products";
-import { State } from "../models/location";
 import { NotFound, InternalServerError } from "../utils/error";
 import { logger } from "../utils/logger";
 import { ObjectId } from "mongodb";
 import { productPayload, ProductService as PS } from "../types";
-import type {
-  image,
-  LocationDocument,
-  locationPayload,
-  ProductDocument,
-} from "../types";
+import type { locationPayload, ProductDocument } from "../types";
 import { uploadMiddleware } from "../middleware/multer";
 import { LocationService } from "./location.service";
 
@@ -46,7 +40,7 @@ export class ProductService implements PS {
       return product;
     } catch (e: any) {
       logger.error(`Error creating product...${e}`);
-      throw new InternalServerError(`Eror creating product...${e}`);
+      throw new InternalServerError(`Error creating product...${e}`);
     }
   }
 
@@ -74,7 +68,7 @@ export class ProductService implements PS {
 
       return { product, url };
     } catch (e) {
-      logger.error(`Error uploading product image: , ${e}`);
+      logger.error(`Error uploading product image:  ${e}`);
       if (e instanceof NotFound) throw e;
       throw new InternalServerError(`Error uploading product image: ${e}`);
     }
@@ -117,22 +111,19 @@ export class ProductService implements PS {
     }
   }
 
-  async getAllProducts(pages: number, limit: number) {
+  async getAllProducts(page: number = 1, limit: number = 10) {
     try {
-      const page = pages || 1;
-      const lim = limit || 10;
-
-      const skip = (page - 1) * lim;
+      const skip = (page - 1) * limit;
       const total = await this.productRepository.countDocuments();
 
       const products = await this.productRepository
         .find()
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(lim);
+        .limit(limit);
 
       if (!products) throw new NotFound(`No product found`);
-      return { products, total, page };
+      return { products, totalPages: Math.ceil(total / limit), page };
     } catch (e: any) {
       logger.error("Error fetching products");
       if (e instanceof NotFound) throw e;
@@ -177,16 +168,28 @@ export class ProductService implements PS {
     }
   }
 
-  async getProductsByState(state: string) {
+  async getProductsByState(
+    state: string,
+    page: number = 1,
+    limit: number = 10
+  ) {
     try {
+      const skip = (page - 1) * limit;
+
       const location = await this.locationService.getState(state);
 
-      const products = await this.productRepository.find({
+      const total = await this.productRepository.countDocuments({
         state: location._id,
       });
 
+      const products = await this.productRepository
+        .find({ state: location._id })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
       if (!products) throw new NotFound(`No product found!`);
-      return products;
+      return { products, totalPages: Math.ceil(total / limit), page };
     } catch (e) {
       logger.error("Error fetching product!");
       if (e instanceof NotFound) throw e;
@@ -194,18 +197,33 @@ export class ProductService implements PS {
     }
   }
 
-  async getProductsByArea(areaName: string, stateName: string) {
+  async getProductsByArea(
+    areaName: string,
+    stateName: string,
+    page: number = 1,
+    limit: number = 10
+  ) {
     try {
       const area = await this.locationService.getArea(areaName);
       const state = await this.locationService.getState(stateName);
 
-      const products = await this.productRepository.find({
+      const skip = (page - 1) * limit;
+
+      const total = await this.productRepository.countDocuments({
         area: area._id,
         state: state._id,
       });
-
+      const products = await this.productRepository
+        .find({
+          area: area._id,
+          state: state._id,
+        })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
       if (!products) throw new NotFound(`No product found!`);
-      return products;
+
+      return { products, totalPages: Math.ceil(total / limit), page };
     } catch (e) {
       logger.error("Error fetching product!");
       if (e instanceof NotFound) throw e;
