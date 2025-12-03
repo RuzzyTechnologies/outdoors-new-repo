@@ -1,11 +1,12 @@
 import { User } from "../models/user";
 import { Conflict, InternalServerError, NotFound } from "../utils/error";
 import type { loginOptions, userOptions, userUpdateFields } from "../types";
+import { UserService as US } from "../types";
 import { logger } from "../utils/logger";
 import { ObjectId } from "mongodb";
 import { uploadMiddleware } from "../middleware/multer";
 
-export class UserService implements UserService {
+export class UserService implements US {
   private userRepository;
 
   constructor() {
@@ -196,5 +197,12 @@ export class UserService implements UserService {
     } catch (e) {
       throw e;
     }
+  }
+  async createOTP() {
+    return "";
+  }
+
+  async verifyOTP() {
+    return true;
   }
 }

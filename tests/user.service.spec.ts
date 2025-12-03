@@ -2,8 +2,6 @@ import { UserService } from "../src/services/user.service";
 import { Conflict, NotFound } from "../src/utils/error";
 import { ObjectId } from "mongodb";
 import { User } from "../src/models/user";
-import { uploadMiddleware } from "../src/middleware/multer";
-import cloudinaryConfig from "../src/utils/cloudinary";
 
 jest.mock("../src/utils/logger", () => ({
   logger: {
@@ -31,19 +29,6 @@ jest.mock("../src/models/user", () => {
 jest.mock("mongodb", () => ({
   ObjectId: jest.fn((id) => `mock-id-${id}`),
 }));
-
-// jest.mock("../src/middleware/multer", () => ({
-//   uploadMiddleware: () => ({
-//     cloudinary: {
-//       uploader: {
-//         upload: jest.fn().mockResolvedValue({
-//           secure_url: "https://mock.cloudinary.com/new-image.jpg",
-//         }),
-//         destroy: jest.fn().mockResolvedValue({ result: "ok" }),
-//       },
-//     },
-//   }),
-// }));
 
 describe("UserService", () => {
   let userService: UserService;
@@ -314,5 +299,9 @@ describe("UserService", () => {
     expect(upload).toHaveBeenCalled();
     expect(upload).toHaveBeenCalledWith(mockFile, "old-image");
     expect(result.newUrl).toBe("https://mock.cloudinary.com/new-image.jpg");
+    expect(mockUpdateOne).toHaveBeenCalledWith(
+      { avatar: "https://mock.cloudinary.com/new-image.jpg" },
+      { new: true, runValidators: true }
+    );
   });
 });

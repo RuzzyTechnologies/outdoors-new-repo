@@ -1,10 +1,11 @@
 import { Admin } from "../models/admin";
 import { Conflict, InternalServerError, NotFound } from "../utils/error";
 import type { adminOptions, loginOptions, adminUpdateFields } from "../types";
+import { AdminService as AS } from "../types";
 import { logger } from "../utils/logger";
 import { ObjectId } from "mongodb";
 
-export class AdminService implements AdminService {
+export class AdminService implements AS {
   private adminRepository;
 
   constructor() {
@@ -162,7 +163,11 @@ export class AdminService implements AdminService {
     }
   }
 
-  async createOTP() {}
+  async createOTP() {
+    return "";
+  }
 
-  async verifyOTP() {}
+  async verifyOTP() {
+    return true;
+  }
 }
