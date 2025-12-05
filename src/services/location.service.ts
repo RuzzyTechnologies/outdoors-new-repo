@@ -1,5 +1,5 @@
 import { Area, State } from "../models/location";
-import { NotFound, InternalServerError } from "../utils/error";
+import { NotFound, InternalServerError, Conflict } from "../utils/error";
 import { logger } from "../utils/logger";
 import { LocationService as LS } from "../types";
 import type { locationPayload } from "../types";
@@ -13,23 +13,21 @@ export class LocationService implements LS {
     this.areaRepository = Area;
   }
 
-  async createState(location: locationPayload) {
+  async createState(stateName: string) {
     try {
-      let state;
-
-      const { stateName } = location;
-
-      state = await this.locationRepository.findOne({
-        stateName: stateName.toLowerCase().trim(),
+      const state = await this.locationRepository.findOne({
+        stateName: stateName.toLowerCase(),
       });
-      if (state) return state;
+      if (state) throw new Conflict("State already exists");
 
-      state = new this.locationRepository({
-        stateName: stateName.toLowerCase().trim(),
+      const newState = new this.locationRepository({
+        stateName: stateName.toLowerCase(),
       });
-      await state.save();
-      return state;
+      await newState.save();
+
+      return newState;
     } catch (e: any) {
+      if (e instanceof Conflict) throw e;
       logger.error(`Error creating state...${e}`);
       throw new InternalServerError(`Error creating state...${e}`);
     }
@@ -38,16 +36,25 @@ export class LocationService implements LS {
   async createArea(location: locationPayload) {
     try {
       const { stateName, stateArea } = location;
-      const state = await this.getState(stateName.toLowerCase().trim());
+      const state = await this.getState(stateName);
 
-      const area = new this.areaRepository({
-        stateArea: stateArea.toLowerCase().trim(),
+      const area = await this.areaRepository.findOne({
+        stateArea: stateArea.toLowerCase(),
         location: state._id,
       });
+      if (area) throw new Conflict("Area already exists");
 
-      return area;
+      const newArea = new this.areaRepository({
+        stateArea: stateArea.toLowerCase(),
+        location: state._id,
+      });
+      await newArea.save();
+
+      return newArea;
     } catch (e: any) {
       logger.error(`Error creating area...${e}`);
+      if (e instanceof Conflict) throw e;
+      if (e instanceof NotFound) throw e;
       throw new InternalServerError(`Error creating area...${e}`);
     }
   }
@@ -55,7 +62,7 @@ export class LocationService implements LS {
   async getState(state: string) {
     try {
       const location = await this.locationRepository.findOne({
-        stateName: state.toLowerCase().trim(),
+        stateName: state.toLowerCase(),
       });
 
       if (!location) {
@@ -69,10 +76,12 @@ export class LocationService implements LS {
     }
   }
 
-  async getArea(area: string) {
+  async getArea(area: string, stateName: string) {
     try {
+      const state = await this.getState(stateName);
       const location = await this.areaRepository.findOne({
-        stateArea: area.toLowerCase().trim(),
+        stateArea: area.toLowerCase(),
+        location: state._id,
       });
 
       if (!location) {
@@ -86,22 +95,19 @@ export class LocationService implements LS {
     }
   }
 
-  async getAllStates(pages: number, limit: number) {
+  async getAllStates(pages: number = 1, limit: number = 10) {
     try {
-      const page = pages || 1;
-      const lim = limit || 10;
-
-      const skip = (page - 1) * lim;
+      const skip = (pages - 1) * limit;
       const total = await this.locationRepository.countDocuments();
 
       const states = await this.locationRepository
-        .findOne({})
+        .find({})
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(lim);
+        .limit(limit);
       if (!states) throw new NotFound("No state found");
 
-      return { states, total, page };
+      return { states, totalPages: Math.ceil(total / limit), pages };
     } catch (e: any) {
       logger.error(`Error fetching states ${e}`);
       if (e instanceof NotFound) throw e;
@@ -111,27 +117,25 @@ export class LocationService implements LS {
 
   async getAllAreasInASpecificState(
     stateName: string,
-    pages: number,
-    limit: number
+    pages: number = 1,
+    limit: number = 10
   ) {
     try {
-      const page = pages || 1;
-      const lim = limit || 10;
-      const skip = (page - 1) * lim;
+      const skip = (pages - 1) * limit;
 
-      const state = await this.getState(stateName.toLowerCase().trim());
+      const state = await this.getState(stateName);
       const total = await this.areaRepository.countDocuments({
         location: state._id,
       });
 
       const areas = await this.areaRepository
-        .findOne({ location: state._id })
+        .find({ location: state._id })
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(lim);
+        .limit(limit);
       if (!areas) throw new NotFound("No area found");
 
-      return { areas, total, page };
+      return { areas, totalPages: Math.ceil(total / limit), pages };
     } catch (e: any) {
       logger.error(`Error fetching areas ${e}`);
       if (e instanceof NotFound) throw e;

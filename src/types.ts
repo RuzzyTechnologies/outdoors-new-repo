@@ -277,21 +277,21 @@ export interface LocationDocument extends Document {
 export interface LocationModel extends Model<LocationDocument> {}
 
 export interface LocationService {
-  createState(location: locationPayload): Promise<LocationDocument>;
+  createState(stateName: string): Promise<LocationDocument>;
   createArea(location: locationPayload): Promise<AreaDocument>;
   getState(state: string): Promise<LocationDocument>;
-  getArea(area: string): Promise<AreaDocument>;
+  getArea(area: string, state: string): Promise<AreaDocument>;
   getAllStates(
     pages: number,
     limit: number
   ): Promise<{
-    states: LocationDocument;
-    total: number;
-    page: number;
+    states: LocationDocument[];
+    totalPages: number;
+    pages: number;
   }>;
   getAllAreasInASpecificState(
     stateName: string,
     pages: number,
     limit: number
-  ): Promise<{ areas: AreaDocument; total: number; page: number }>;
+  ): Promise<{ areas: AreaDocument[]; totalPages: number; pages: number }>;
 }
