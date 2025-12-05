@@ -58,7 +58,6 @@ describe("ProductService", () => {
     const mockSave = jest.fn().mockResolvedValue({});
     (Product.prototype.save as jest.Mock) = mockSave;
 
-    (LocationService.prototype.getState as jest.Mock) = mockSave;
     (LocationService.prototype.getArea as jest.Mock) = mockSave;
 
     const id = "ajscsfgrfbhb";

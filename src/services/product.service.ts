@@ -24,15 +24,14 @@ export class ProductService implements PS {
     try {
       const { stateName, stateArea } = locationDetails;
 
-      const state = await this.locationService.getState(stateName);
-      const area = await this.locationService.getArea(stateArea);
+      const area = await this.locationService.getArea(stateArea, stateName);
 
       const _id = new ObjectId(id);
 
       const product = new this.productRepository({
         ...payload,
         owner: _id,
-        state: state._id,
+        state: area.location,
         area: area._id,
       });
       await product.save();
@@ -204,19 +203,18 @@ export class ProductService implements PS {
     limit: number = 10
   ) {
     try {
-      const area = await this.locationService.getArea(areaName);
-      const state = await this.locationService.getState(stateName);
+      const area = await this.locationService.getArea(areaName, stateName);
 
       const skip = (page - 1) * limit;
 
       const total = await this.productRepository.countDocuments({
         area: area._id,
-        state: state._id,
+        state: area.location,
       });
       const products = await this.productRepository
         .find({
           area: area._id,
-          state: state._id,
+          state: area.location,
         })
         .sort({ createdAt: -1 })
         .skip(skip)
