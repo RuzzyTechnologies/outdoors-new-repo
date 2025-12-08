@@ -28,8 +28,8 @@ export class LocationService implements LS {
       return newState;
     } catch (e: any) {
       if (e instanceof Conflict) throw e;
-      logger.error(`Error creating state...${e}`);
-      throw new InternalServerError(`Error creating state...${e}`);
+      logger.error(`Error creating state`);
+      throw new InternalServerError(`Error creating state.`);
     }
   }
 
@@ -52,10 +52,10 @@ export class LocationService implements LS {
 
       return newArea;
     } catch (e: any) {
-      logger.error(`Error creating area...${e}`);
+      logger.error(`Error creating area`);
       if (e instanceof Conflict) throw e;
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Error creating area...${e}`);
+      throw new InternalServerError(`Error creating area`);
     }
   }
 
@@ -72,7 +72,7 @@ export class LocationService implements LS {
     } catch (e: any) {
       logger.error(`Error fetching state...${e}`);
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Error fetching state...${e}`);
+      throw new InternalServerError(`Error fetching state.`);
     }
   }
 
@@ -91,7 +91,7 @@ export class LocationService implements LS {
     } catch (e: any) {
       logger.error(`Error fetching area...${e}`);
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Error fetching area...${e}`);
+      throw new InternalServerError(`Error fetching area`);
     }
   }
 
@@ -109,9 +109,9 @@ export class LocationService implements LS {
 
       return { states, totalPages: Math.ceil(total / limit), pages };
     } catch (e: any) {
-      logger.error(`Error fetching states ${e}`);
+      logger.error(`Error fetching states`);
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Error fetching states...${e}`);
+      throw new InternalServerError(`Error fetching states`);
     }
   }
 
@@ -137,9 +137,9 @@ export class LocationService implements LS {
 
       return { areas, totalPages: Math.ceil(total / limit), pages };
     } catch (e: any) {
-      logger.error(`Error fetching areas ${e}`);
+      logger.error(`Error fetching areas`);
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Error fetching areas...${e}`);
+      throw new InternalServerError(`Error fetching areas`);
     }
   }
 }

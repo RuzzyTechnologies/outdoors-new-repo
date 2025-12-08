@@ -38,8 +38,8 @@ export class ProductService implements PS {
       logger.info("Product created...");
       return product;
     } catch (e: any) {
-      logger.error(`Error creating product...${e}`);
-      throw new InternalServerError(`Error creating product...${e}`);
+      logger.error(`Error creating product.`);
+      throw new InternalServerError(`Error creating product.`);
     }
   }
 
@@ -67,9 +67,9 @@ export class ProductService implements PS {
 
       return { product, url };
     } catch (e) {
-      logger.error(`Error uploading product image:  ${e}`);
+      logger.error(`Error uploading product image`);
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Error uploading product image: ${e}`);
+      throw new InternalServerError(`Error uploading product image`);
     }
   }
 
@@ -106,7 +106,7 @@ export class ProductService implements PS {
     } catch (e: any) {
       logger.error("Product fetch unsuccessful!");
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Product fetch unsuccessful!, ${e}`);
+      throw new InternalServerError(`Product fetch unsuccessful!`);
     }
   }
 
@@ -126,7 +126,7 @@ export class ProductService implements PS {
     } catch (e: any) {
       logger.error("Error fetching products");
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Error fetching products, ${e}`);
+      throw new InternalServerError(`Error fetching products`);
     }
   }
 
@@ -148,7 +148,7 @@ export class ProductService implements PS {
     } catch (e) {
       logger.error("Product updation unsuccessful!");
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Product updation unsuccessful!, ${e}`);
+      throw new InternalServerError(`Product updation unsuccessful!`);
     }
   }
 
@@ -163,7 +163,7 @@ export class ProductService implements PS {
     } catch (e) {
       logger.error("Product deletion unsuccessful!");
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Product deletion unsuccessful!, ${e}`);
+      throw new InternalServerError(`Product deletion unsuccessful!`);
     }
   }
 
@@ -192,7 +192,7 @@ export class ProductService implements PS {
     } catch (e) {
       logger.error("Error fetching product!");
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Error fetching product!, ${e}`);
+      throw new InternalServerError(`Error fetching product!`);
     }
   }
 
@@ -225,7 +225,7 @@ export class ProductService implements PS {
     } catch (e) {
       logger.error("Error fetching product!");
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError(`Error fetching product!, ${e}`);
+      throw new InternalServerError(`Error fetching product!`);
     }
   }
 }

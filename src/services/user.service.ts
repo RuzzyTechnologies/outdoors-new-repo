@@ -38,7 +38,7 @@ export class UserService implements US {
     } catch (e: any) {
       if (e instanceof Conflict) throw e;
       logger.error("Error creating user");
-      throw new InternalServerError(`Error creating user, ${e}`);
+      throw new InternalServerError(`Error creating user`);
     }
   }
 
@@ -59,7 +59,7 @@ export class UserService implements US {
     } catch (e: any) {
       if (e instanceof NotFound) throw e;
       logger.error("Error logging user in...", e);
-      throw new InternalServerError(`Error logging user in... ${e}`);
+      throw new InternalServerError(`Error logging user in.`);
     }
   }
 
@@ -73,7 +73,7 @@ export class UserService implements US {
       logger.info("User successfully logged out...");
     } catch (e: any) {
       logger.error("Error logging user out...");
-      throw new InternalServerError(`Error logging user out...${e}`);
+      throw new InternalServerError(`Error logging user out`);
     }
   }
 
@@ -85,7 +85,7 @@ export class UserService implements US {
       logger.info("User successfully logged out...");
     } catch (e: any) {
       logger.error("Error logging user out...");
-      throw new InternalServerError(`Error user user out...${e}`);
+      throw new InternalServerError(`Error user user out`);
     }
   }
 
@@ -104,7 +104,7 @@ export class UserService implements US {
       if (e instanceof NotFound) throw e;
 
       logger.error(`Error updating fields...`);
-      throw new InternalServerError(`Error updating fields...${e}`);
+      throw new InternalServerError(`Error updating fields`);
     }
   }
 
@@ -127,7 +127,7 @@ export class UserService implements US {
       if (e instanceof NotFound) throw e;
 
       logger.error(`Error updating password...`);
-      throw new InternalServerError(`Error updating password...${e}`);
+      throw new InternalServerError(`Error updating password`);
     }
   }
 
@@ -142,7 +142,7 @@ export class UserService implements US {
     } catch (e) {
       if (e instanceof NotFound) throw e;
       logger.error(`Error deleting user...`);
-      throw new InternalServerError(`Error deleting user...${e}`);
+      throw new InternalServerError(`Error deleting user`);
     }
   }
 
@@ -167,8 +167,9 @@ export class UserService implements US {
       );
       return { user, newUrl };
     } catch (e) {
-      logger.error(`Error uploading user image: , ${e}`);
-      throw e;
+      if (e instanceof NotFound) throw e;
+      logger.error(`Error uploading user image`);
+      throw new InternalServerError(`Error uploading user image`);
     }
   }
 

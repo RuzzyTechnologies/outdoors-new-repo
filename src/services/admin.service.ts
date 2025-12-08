@@ -43,7 +43,7 @@ export class AdminService implements AS {
     } catch (e: any) {
       if (e instanceof Conflict) throw e;
       logger.error("Error creating admin");
-      throw new InternalServerError(`Error creating admin, ${e}`);
+      throw new InternalServerError(`Error creating admin`);
     }
   }
 
@@ -64,7 +64,7 @@ export class AdminService implements AS {
     } catch (e: any) {
       if (e instanceof NotFound) throw e;
       logger.error("Error logging admin in...", e);
-      throw new InternalServerError(`Error logging admin in... ${e}`);
+      throw new InternalServerError(`Error logging admin in`);
     }
   }
 
@@ -78,7 +78,7 @@ export class AdminService implements AS {
       logger.info("Admin successfully logged out...");
     } catch (e: any) {
       logger.error("Error logging admin out...");
-      throw new InternalServerError(`Error logging admin out...${e}`);
+      throw new InternalServerError(`Error logging admin out`);
     }
   }
 
@@ -89,7 +89,7 @@ export class AdminService implements AS {
       logger.info("Admin successfully logged out...");
     } catch (e: any) {
       logger.error("Error logging admin out...");
-      throw new InternalServerError(`Error logging admin out...${e}`);
+      throw new InternalServerError(`Error logging admin out`);
     }
   }
 
@@ -108,7 +108,7 @@ export class AdminService implements AS {
       if (e instanceof NotFound) throw e;
 
       logger.error(`Error updating fields...`);
-      throw new InternalServerError(`Error updating fields...${e}`);
+      throw new InternalServerError(`Error updating fields`);
     }
   }
 
@@ -131,7 +131,7 @@ export class AdminService implements AS {
       if (e instanceof NotFound) throw e;
 
       logger.error(`Error updating password...`);
-      throw new InternalServerError(`Error updating password...${e}`);
+      throw new InternalServerError(`Error updating password`);
     }
   }
 
@@ -147,7 +147,7 @@ export class AdminService implements AS {
       if (e instanceof NotFound) throw e;
 
       logger.error(`Error deleting admin...`);
-      throw new InternalServerError(`Error deleting admin...${e}`);
+      throw new InternalServerError(`Error deleting admin`);
     }
   }
 
