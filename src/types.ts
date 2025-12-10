@@ -295,3 +295,51 @@ export interface LocationService {
     limit: number
   ): Promise<{ areas: AreaDocument[]; totalPages: number; pages: number }>;
 }
+
+/** ORDER */
+export interface OrderDocument extends Document {
+  user: string;
+  userDetails: string;
+  product: string;
+  invoice: string;
+  dateRequested: Date;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface OrderModel extends Model<OrderDocument> {}
+
+export type orderPayload = {
+  userId: string;
+  productId: string;
+  dateRequested: string;
+  status: "Pending" | "Fulfilled";
+};
+
+export interface OrderService {
+  createOrder: (order: orderPayload) => Promise<void>;
+}
+
+/** QUOTE */
+export interface QuoteDocument extends Document {
+  title: string;
+  price: string;
+  availableFrom: Date;
+  availableTo: Date;
+  orderId: ObjectId;
+  invoice: string;
+  description: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface QuoteModel extends Model<QuoteDocument> {}
+
+export type quotePayload = {
+  title: string;
+  price: number;
+  availableFrom: string;
+  availableTo: string;
+  description: string;
+};

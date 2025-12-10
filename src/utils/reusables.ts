@@ -44,3 +44,5 @@ export const PRODUCT_CATEGORY = [
   "96 Sheet Billboard",
   "Static Light Box Lamp Post Billboard",
 ];
+
+export const ORDER_STATUS = ["Pending", "Fulfilled"];
