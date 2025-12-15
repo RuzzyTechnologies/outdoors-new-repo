@@ -32,13 +32,14 @@ export class OrderService implements OS {
 
       const newOrder = new this.orderRepository({
         user: user.fullName,
-        userDetails: stringParser([user.email, user.phoneNo]),
+        userDetails: this.parseStringArray([user.email, user.phoneNo]),
         product: product.title,
         invoice,
-        dateRequested: dateParser(dateRequested),
+        dateRequested: this.parseDate(dateRequested),
         status,
       });
       await newOrder.save();
+      return newOrder;
     } catch (e: any) {
       logger.error("Error creating order");
       throw new InternalServerError("Error creating order");
@@ -90,8 +91,8 @@ export class OrderService implements OS {
         title,
         price,
         description,
-        availableFrom: dateParser(availableFrom),
-        availableTo: dateParser(availableTo),
+        availableFrom: this.parseDate(availableFrom),
+        availableTo: this.parseDate(availableTo),
         invoice: order.invoice,
         orderId: order._id,
       });
@@ -100,6 +101,7 @@ export class OrderService implements OS {
       return quote;
     } catch (e: any) {
       logger.error("Error creating error");
+      if (e instanceof NotFound) throw e;
       throw new InternalServerError("Error creating user");
     }
   }
@@ -140,7 +142,30 @@ export class OrderService implements OS {
   }
 
   private createInvoiceString() {
-    return randomString(16);
+    try {
+      return randomString(16);
+    } catch (e: any) {
+      logger.error("Error creating invoice.");
+      throw new InternalServerError("Error creating invoice.");
+    }
+  }
+
+  private parseDate(date: string) {
+    try {
+      return dateParser(date);
+    } catch (e: any) {
+      logger.error("Error parsing date string.");
+      throw new InternalServerError("Error parsing date string.");
+    }
+  }
+
+  private parseStringArray(args: any[]) {
+    try {
+      return stringParser(args);
+    } catch (e: any) {
+      logger.error("Error parsing string array.");
+      throw new InternalServerError("Error parsing string array.");
+    }
   }
 
   async sendQuote(orderId: string, email: string) {}

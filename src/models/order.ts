@@ -1,13 +1,8 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-import {
-  OrderDocument,
-  OrderModel,
-  QuoteDocument,
-  QuoteModel,
-} from "../types.js";
-import { ORDER_STATUS } from "../utils/reusables.js";
+import { OrderDocument, OrderModel, QuoteDocument, QuoteModel } from "../types";
+import { ORDER_STATUS } from "../utils/reusables";
 
 const quoteSchema = new Schema(
   {

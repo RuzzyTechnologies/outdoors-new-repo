@@ -314,11 +314,26 @@ export type orderPayload = {
   userId: string;
   productId: string;
   dateRequested: string;
-  status: "Pending" | "Fulfilled";
+  status: string;
 };
 
 export interface OrderService {
-  createOrder: (order: orderPayload) => Promise<void>;
+  createOrder: (order: orderPayload) => Promise<OrderDocument>;
+  findSpecificOrder: (orderId: string) => Promise<OrderDocument>;
+  getAllOrders: (
+    page: number,
+    limit: number
+  ) => Promise<{ orders: OrderDocument[]; totalPages: number; page: number }>;
+
+  createQuote: (
+    orderId: string,
+    payload: quotePayload
+  ) => Promise<QuoteDocument>;
+  findSpecificQuote: (quoteId: string) => Promise<QuoteDocument>;
+  updateQuote: (
+    quoteId: string,
+    payload: quotePayload
+  ) => Promise<QuoteDocument>;
 }
 
 /** QUOTE */
