@@ -2,11 +2,8 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 import { documentSchema } from "./manageBillboard";
-import {
-  ERR_DESCRIPTION_REQUIRED,
-  PRODUCT_CATEGORY,
-} from "../utils/reusables.js";
-import { ProductDocument, ProductModel } from "../types.js";
+import { ERR_DESCRIPTION_REQUIRED, PRODUCT_CATEGORY } from "../utils/reusables";
+import { ProductDocument, ProductModel } from "../types";
 
 const productSchema = new Schema(
   {
