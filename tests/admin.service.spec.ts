@@ -100,7 +100,7 @@ describe("AdminService", () => {
 
     const payload = {
       email: "sam23@gmail.com",
-      loginPassword: "333333",
+      password: "333333",
     };
 
     await expect(adminService.login(payload)).rejects.toThrow(NotFound);
@@ -119,7 +119,7 @@ describe("AdminService", () => {
 
     const loginPayload = {
       email: "sam23@example.com",
-      loginPassword: "333333",
+      password: "333333",
     };
 
     await expect(adminService.login(loginPayload)).rejects.toThrow(NotFound);
@@ -128,7 +128,7 @@ describe("AdminService", () => {
   test("should sucessfully login if credentials match", async () => {
     const loginPayload = {
       email: "sam23@example.com",
-      loginPassword: "1234445",
+      password: "1234445",
     };
 
     const mockInstance = {

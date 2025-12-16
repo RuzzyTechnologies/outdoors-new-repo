@@ -1,5 +1,6 @@
 import { Document, Model } from "mongoose";
 import { ObjectId } from "mongodb";
+import { NextFunction, Request, Response } from "express";
 
 /** ADMIN */
 
@@ -13,8 +14,41 @@ export interface AdminService {
   ) => Promise<AdminDocument>;
   updatePassword: (id: string, password: string) => Promise<AdminDocument>;
   deleteAdmin: (id: string) => Promise<AdminDocument>;
-  createOTP: () => Promise<string>;
-  verifyOTP: () => Promise<boolean>;
+}
+
+export interface AdminController {
+  signup: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  login: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  logout: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  logoutFromAllDevices: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  updateAdmin: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  updateAdminPassword: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  deleteAdmin: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+}
+
+export interface AuthenticatedRequest extends Request {
+  admin: AdminDocument;
+  token: string;
 }
 
 export type adminOptions = {
@@ -26,7 +60,7 @@ export type adminOptions = {
 };
 export type loginOptions = {
   email: string;
-  loginPassword: string;
+  password: string;
 };
 
 type tokenizedAdmin = {

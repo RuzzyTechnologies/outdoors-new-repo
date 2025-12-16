@@ -49,10 +49,10 @@ export class AdminService implements AS {
 
   async login(payload: loginOptions) {
     try {
-      const { email, loginPassword } = payload;
+      const { email, password } = payload;
       const admin = await this.adminRepository.findByCredentials({
         email,
-        loginPassword,
+        password,
       });
       if (!admin) {
         throw new NotFound("Wrong email/password combination");
@@ -75,6 +75,7 @@ export class AdminService implements AS {
       );
 
       await req.admin.save();
+
       logger.info("Admin successfully logged out...");
     } catch (e: any) {
       logger.error("Error logging admin out...");
@@ -161,13 +162,5 @@ export class AdminService implements AS {
       logger.error(`Error fetching admin...`);
       throw e;
     }
-  }
-
-  async createOTP() {
-    return "";
-  }
-
-  async verifyOTP() {
-    return true;
   }
 }

@@ -95,12 +95,12 @@ adminSchema.methods.generateAuthToken = async function () {
 
 adminSchema.statics.findByCredentials = async (payload: loginOptions) => {
   try {
-    const { email, loginPassword } = payload;
+    const { email, password } = payload;
     const admin = await Admin.findOne({ email });
 
     if (!admin) throw new NotFound("Wrong email/password combination");
 
-    const isMatch = await verifyPassword(admin.password, loginPassword);
+    const isMatch = await verifyPassword(admin.password, password);
     if (!isMatch) throw new NotFound("Wrong email/password combination");
 
     return admin;
