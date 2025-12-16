@@ -1,7 +1,8 @@
 import crypto from "crypto";
 
 export function dateParser(date: string) {
-  const [month, day, year] = date.split("/");
+  // date = "08/03/2025"
+  const [day, month, year] = date.split("/");
   return new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
 }
 
@@ -10,5 +11,10 @@ export function randomString(length: number) {
 }
 
 export function stringParser(args: any[]) {
-  return `${args[0]}, ${args[1]}`;
+  let string = "";
+  for (let i = 0; i < args.length; ++i) {
+    string += `${args[i]} `;
+  }
+
+  return string.trim();
 }

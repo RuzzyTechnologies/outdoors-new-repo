@@ -34,19 +34,6 @@ jest.mock("../src/models/products", () => {
   return { Product: mockProduct };
 });
 
-jest.mock("../src/services/location.service", () => {
-  const mockLocationService: any = jest.fn();
-
-  mockLocationService.prototype.getState = jest
-    .fn()
-    .mockResolvedValue({ _id: 23343463365663 });
-  mockLocationService.prototype.getArea = jest
-    .fn()
-    .mockResolvedValue({ _id: 23343463365663 });
-
-  return { LocationService: mockLocationService };
-});
-
 describe("ProductService", () => {
   let productService: ProductService;
 
