@@ -95,7 +95,28 @@ export class ProductController implements PC {
       next(e);
     }
   }
+  async getSpecificProduct(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { productId } = req.query;
+      const product = await this.productService.getSpecificProduct(
+        productId as string
+      );
 
+      res.status(200).json({
+        status: 200,
+        message: "Product fetched successfully",
+        data: {
+          product,
+        },
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
   async getAllProducts(
     req: AuthenticatedRequest,
     res: Response,

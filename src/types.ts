@@ -421,6 +421,40 @@ export interface LocationService {
   ): Promise<{ areas: AreaDocument[]; totalPages: number; pages: number }>;
 }
 
+export interface LocationController {
+  createState: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  createArea: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+
+  getArea: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  getState: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  getAllStates: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  getAllAreasInASpecificState: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+}
+
 /** ORDER */
 export interface OrderDocument extends Document {
   user: string;

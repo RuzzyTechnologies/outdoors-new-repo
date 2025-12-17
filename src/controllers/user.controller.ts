@@ -166,4 +166,25 @@ export class UserController implements UC {
       next(e);
     }
   }
+
+  async uploadAvatar(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.file) throw new BadRequest("Bad Request. File not found");
+      const { user, newUrl } = await this.userService.uploadAvatar(
+        req.user._id as string,
+        req.file as Express.Multer.File
+      );
+
+      res.status(200).json({
+        status: 200,
+        message: "Avatar uplaoded successfully!",
+        data: {
+          user,
+          avatarUrl: newUrl,
+        },
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
