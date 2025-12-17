@@ -20,6 +20,7 @@ jest.mock("../src/models/user", () => {
   mockUser.findOneAndUpdate = jest.fn();
   mockUser.findByCredentials = jest.fn();
   mockUser.findByIdAndDelete = jest.fn();
+  mockUser.findByIdAndUpdate = jest.fn();
   mockUser.prototype.save = jest.fn();
   mockUser.prototype.generateAuthToken = jest.fn();
 
@@ -104,7 +105,7 @@ describe("UserService", () => {
 
     const loginPayload = {
       email: "qwer@example.com",
-      loginPassword: "poiuytrewq1234567890",
+      password: "poiuytrewq1234567890",
     };
 
     await expect(userService.login(loginPayload)).rejects.toThrow(NotFound);
@@ -124,7 +125,7 @@ describe("UserService", () => {
 
     const loginPayload = {
       email: "str@example.com",
-      loginPassword: "qwer2.",
+      password: "qwer2.",
     };
 
     await expect(userService.login(loginPayload)).rejects.toThrow(NotFound);
@@ -132,7 +133,7 @@ describe("UserService", () => {
   test("should sucessfully login if credentials match", async () => {
     const loginPayload = {
       email: "sam23@example.com",
-      loginPassword: "1234445",
+      password: "1234445",
     };
 
     const mockInstance = {
@@ -253,7 +254,7 @@ describe("UserService", () => {
   });
 
   test("should throw a NOTFOUND error if user doesnt exist (deletePassword)", () => {
-    const user = User.findByIdAndDelete as jest.Mock;
+    const user = User.findByIdAndUpdate as jest.Mock;
     user.mockResolvedValue(null);
 
     const id = "223456789";
@@ -269,7 +270,7 @@ describe("UserService", () => {
       position: "manager",
     };
 
-    const user = User.findByIdAndDelete as jest.Mock;
+    const user = User.findByIdAndUpdate as jest.Mock;
     user.mockResolvedValue(mockValue);
     const id = "223456789";
     const deleteOperation = await userService.deleteUser(id);
