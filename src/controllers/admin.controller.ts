@@ -144,9 +144,9 @@ export class AdminController implements AC {
     next: NextFunction
   ) {
     try {
-      if (Object.keys(req.body).length === 0)
-        throw new BadRequest("Bad Request. Fields (password) cannot be empty");
       const { password } = req.body;
+      if (!password)
+        throw new BadRequest("Bad Request. Fields (password) cannot be empty");
 
       const updatedAdmin = await this.adminService.updatePassword(
         req.admin._id as string,

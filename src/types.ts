@@ -136,6 +136,46 @@ export interface UserService {
   verifyOTP: () => Promise<boolean>;
 }
 
+export interface UserController {
+  signup: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  login: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  logout: (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  logoutFromAllDevices: (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  getUser: (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  updateUser: (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  updateUserPassword: (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  softDeleteUser: (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+}
+
+export interface AuthRequest extends Request {
+  user: UserDocument;
+  token: string;
+}
+
 export interface UserDocument extends Document {
   fullName: string;
   email: string;
@@ -144,6 +184,7 @@ export interface UserDocument extends Document {
   position: string;
   password: string;
   avatar: string;
+  softDeleted: boolean;
   tokens: string[];
   createdAt: Date;
   updatedAt: Date;

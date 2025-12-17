@@ -60,6 +60,10 @@ const userSchema = new Schema(
       type: String,
       trim: true,
     },
+    softDeleted: {
+      type: Boolean,
+      default: false,
+    },
     tokens: [
       {
         token: {
@@ -107,12 +111,12 @@ userSchema.methods.generateAuthToken = async function () {
 
 userSchema.statics.findByCredentials = async (payload: loginOptions) => {
   try {
-    const { email, loginPassword } = payload;
+    const { email, password } = payload;
     const user = await User.findOne({ email });
 
     if (!user) throw new NotFound("Wrong email/password combination");
 
-    const isMatch = await verifyPassword(user.password, loginPassword);
+    const isMatch = await verifyPassword(user.password, password);
     if (!isMatch) throw new NotFound("Wrong email/password combination");
 
     return user;

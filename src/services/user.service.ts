@@ -44,14 +44,17 @@ export class UserService implements US {
 
   async login(payload: loginOptions) {
     try {
-      const { email, loginPassword } = payload;
+      const { email, password } = payload;
       const user = await this.userRepository.findByCredentials({
         email,
-        loginPassword,
+        password,
       });
       if (!user) {
         throw new NotFound("Wrong email/password combination");
       }
+      if (user.softDeleted)
+        throw new NotFound("Wrong email/password combination");
+
       const token = await user.generateAuthToken();
 
       logger.info("User successfully logged in...");
@@ -134,7 +137,11 @@ export class UserService implements US {
   async deleteUser(id: string) {
     try {
       const _id = new ObjectId(id);
-      const user = await this.userRepository.findByIdAndDelete(_id);
+      const user = await this.userRepository.findByIdAndUpdate(
+        _id,
+        { softDeleted: true },
+        { runValidators: true, new: true }
+      );
       if (!user) throw new NotFound(`User doesn't exist`);
 
       logger.info("User successfully deleted");
