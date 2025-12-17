@@ -46,6 +46,7 @@ const productSchema = new Schema(
     address: {
       type: String,
       trim: true,
+      required: true,
     },
     image: {
       type: documentSchema,
@@ -55,10 +56,11 @@ const productSchema = new Schema(
       default: false,
     },
     quantity: {
-      type: String,
+      type: Number,
       trim: true,
+      default: 1,
     },
-    owner: {
+    createdBy: {
       type: Schema.Types.ObjectId,
       ref: "Admin",
       required: true,

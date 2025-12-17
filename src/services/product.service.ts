@@ -3,7 +3,11 @@ import { NotFound, InternalServerError } from "../utils/error";
 import { logger } from "../utils/logger";
 import { ObjectId } from "mongodb";
 import { productPayload, ProductService as PS } from "../types";
-import type { locationPayload, ProductDocument } from "../types";
+import type {
+  locationPayload,
+  ProductDocument,
+  updateProductPayload,
+} from "../types";
 import { uploadMiddleware } from "../middleware/multer";
 import { LocationService } from "./location.service";
 
@@ -30,7 +34,7 @@ export class ProductService implements PS {
 
       const product = new this.productRepository({
         ...payload,
-        owner: _id,
+        createdBy: _id,
         state: area.location,
         area: area._id,
       });
@@ -130,7 +134,7 @@ export class ProductService implements PS {
     }
   }
 
-  async updateProduct(id: string, payload: productPayload) {
+  async updateProduct(id: string, payload: updateProductPayload) {
     try {
       const _id = new ObjectId(String(id));
       const product = await this.productRepository.findOneAndUpdate(

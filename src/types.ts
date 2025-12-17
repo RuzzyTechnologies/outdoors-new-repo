@@ -223,6 +223,17 @@ export type productPayload = {
   address: string;
 };
 
+export type updateProductPayload = {
+  title?: string;
+  category?: string;
+  availability?: boolean;
+  description?: string;
+  quantity?: string;
+  featured?: boolean;
+  size?: string;
+  address?: string;
+};
+
 export interface ProductDocument extends Document {
   title: string;
   category: Category;
@@ -235,7 +246,7 @@ export interface ProductDocument extends Document {
   image: image;
   featured: boolean;
   quantity: string;
-  owner: ObjectId;
+  createdBy: ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -276,6 +287,45 @@ export interface ProductService {
     areaName: string,
     stateName: string
   ): Promise<{ products: ProductDocument[]; totalPages: number; page: number }>;
+}
+
+export interface ProductController {
+  addProduct: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  uploadImage: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+
+  getAllProducts: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  updateProduct: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  getProductsByArea: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  getProductsByState: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  deleteProduct: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
 }
 
 type Category =
