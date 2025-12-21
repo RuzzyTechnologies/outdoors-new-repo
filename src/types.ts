@@ -47,8 +47,8 @@ export interface AdminController {
 }
 
 export interface AuthenticatedRequest extends Request {
-  admin: AdminDocument;
-  token: string;
+  admin?: AdminDocument;
+  token?: string;
 }
 
 export type adminOptions = {
@@ -172,8 +172,8 @@ export interface UserController {
 }
 
 export interface AuthRequest extends Request {
-  user: UserDocument;
-  token: string;
+  user?: UserDocument;
+  token?: string;
 }
 
 export interface UserDocument extends Document {
@@ -495,6 +495,39 @@ export interface OrderService {
   ) => Promise<QuoteDocument>;
 }
 
+export interface OrderController {
+  createOrder: (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  findSpecificOrder: (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  getAllOrders: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  createQuote: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  updateQuote: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+  findSpecificQuote: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+}
+
 /** QUOTE */
 export interface QuoteDocument extends Document {
   title: string;
@@ -516,4 +549,12 @@ export type quotePayload = {
   availableFrom: string;
   availableTo: string;
   description: string;
+};
+
+export type updateQuotePayload = {
+  title?: string;
+  price?: number;
+  availableFrom?: string;
+  availableTo?: string;
+  description?: string;
 };
