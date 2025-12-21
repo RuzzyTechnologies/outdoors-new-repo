@@ -1,6 +1,6 @@
 import { Order, Quote } from "../models/order";
 import { OrderService as OS } from "../types";
-import type { orderPayload, quotePayload } from "../types";
+import type { orderPayload, quotePayload, updateQuotePayload } from "../types";
 import { InternalServerError, NotFound } from "../utils/error";
 import { logger } from "../utils/logger";
 import { ObjectId } from "mongodb";
@@ -121,7 +121,7 @@ export class OrderService implements OS {
     }
   }
 
-  async updateQuote(quoteId: string, quotePayload: quotePayload) {
+  async updateQuote(quoteId: string, quotePayload: updateQuotePayload) {
     try {
       const _id = new ObjectId(quoteId);
       const quote = await this.quoteRepository.findByIdAndUpdate(
