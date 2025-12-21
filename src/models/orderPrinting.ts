@@ -13,8 +13,10 @@ const printingSchema = new Schema(
       type: String,
       trim: true,
     },
-    document: documentSchema,
-    default: () => ({}),
+    document: {
+      type: documentSchema,
+      default: () => ({}),
+    },
   },
   {
     timestamps: true,
