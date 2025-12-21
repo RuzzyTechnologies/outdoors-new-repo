@@ -237,7 +237,7 @@ describe("LocationService", () => {
     ).rejects.toThrow(NotFound);
   });
 
-  test("should successfully featch all the areas in a state (getAllAreasInASpecificState)", async () => {
+  test("should successfully fetch all the areas in a state (getAllAreasInASpecificState)", async () => {
     const _id = new ObjectId();
     const mockQuery = {
       sort: jest.fn().mockReturnThis(),
