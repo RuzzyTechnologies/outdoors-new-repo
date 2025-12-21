@@ -114,22 +114,24 @@ export class UserController implements UC {
         );
       const { fullname, phoneNo, companyName, position } = req.body;
 
-      const user = await this.userService.updateUserInfo(
-        req.user._id as string,
-        {
-          fullname,
-          phoneNo,
-          companyName,
-          position,
-        }
-      );
-      res.status(200).json({
-        status: 200,
-        message: "User info successfully updated!",
-        data: {
-          user,
-        },
-      });
+      if (req.user) {
+        const user = await this.userService.updateUserInfo(
+          req.user._id as string,
+          {
+            fullname,
+            phoneNo,
+            companyName,
+            position,
+          }
+        );
+        res.status(200).json({
+          status: 200,
+          message: "User info successfully updated!",
+          data: {
+            user,
+          },
+        });
+      }
     } catch (e) {
       next(e);
     }
@@ -145,23 +147,26 @@ export class UserController implements UC {
         throw new BadRequest(
           "Bad Request. One of fields (username, firstName, and lastName) cannot be empty"
         );
-
-      await this.userService.updatePassword(req.user._id as string, password);
-      res.status(200).json({
-        status: 200,
-        message: "User password successfully updated!",
-      });
+      if (req.user) {
+        await this.userService.updatePassword(req.user._id as string, password);
+        res.status(200).json({
+          status: 200,
+          message: "User password successfully updated!",
+        });
+      }
     } catch (e) {
       next(e);
     }
   }
   async softDeleteUser(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      await this.userService.deleteUser(req.user.id as string);
-      res.status(200).json({
-        status: 200,
-        message: "User deleted successfully",
-      });
+      if (req.user) {
+        await this.userService.deleteUser(req.user.id as string);
+        res.status(200).json({
+          status: 200,
+          message: "User deleted successfully",
+        });
+      }
     } catch (e) {
       next(e);
     }
@@ -170,19 +175,22 @@ export class UserController implements UC {
   async uploadAvatar(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.file) throw new BadRequest("Bad Request. File not found");
-      const { user, newUrl } = await this.userService.uploadAvatar(
-        req.user._id as string,
-        req.file as Express.Multer.File
-      );
 
-      res.status(200).json({
-        status: 200,
-        message: "Avatar uplaoded successfully!",
-        data: {
-          user,
-          avatarUrl: newUrl,
-        },
-      });
+      if (req.user) {
+        const { user, newUrl } = await this.userService.uploadAvatar(
+          req.user._id as string,
+          req.file as Express.Multer.File
+        );
+
+        res.status(200).json({
+          status: 200,
+          message: "Avatar uplaoded successfully!",
+          data: {
+            user,
+            avatarUrl: newUrl,
+          },
+        });
+      }
     } catch (e) {
       next(e);
     }

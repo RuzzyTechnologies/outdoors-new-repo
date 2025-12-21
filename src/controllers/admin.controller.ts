@@ -121,18 +121,20 @@ export class AdminController implements AC {
         );
       const { firstName, lastName, username } = req.body;
 
-      const updatedAdmin = await this.adminService.updateAdminInfo(
-        req.admin._id as string,
-        { firstName, lastName, username }
-      );
+      if (req.admin) {
+        const updatedAdmin = await this.adminService.updateAdminInfo(
+          req.admin._id as string,
+          { firstName, lastName, username }
+        );
 
-      res.status(200).json({
-        status: 200,
-        message: "Admin successfully updated!",
-        data: {
-          admin: updatedAdmin,
-        },
-      });
+        res.status(200).json({
+          status: 200,
+          message: "Admin successfully updated!",
+          data: {
+            admin: updatedAdmin,
+          },
+        });
+      }
     } catch (e) {
       next(e);
     }
@@ -148,18 +150,20 @@ export class AdminController implements AC {
       if (!password)
         throw new BadRequest("Bad Request. Fields (password) cannot be empty");
 
-      const updatedAdmin = await this.adminService.updatePassword(
-        req.admin._id as string,
-        password
-      );
+      if (req.admin) {
+        const updatedAdmin = await this.adminService.updatePassword(
+          req.admin._id as string,
+          password
+        );
 
-      res.status(200).json({
-        status: 200,
-        message: "Admin successfully updated!",
-        data: {
-          admin: updatedAdmin,
-        },
-      });
+        res.status(200).json({
+          status: 200,
+          message: "Admin successfully updated!",
+          data: {
+            admin: updatedAdmin,
+          },
+        });
+      }
     } catch (e) {
       next(e);
     }
@@ -171,11 +175,13 @@ export class AdminController implements AC {
     next: NextFunction
   ) {
     try {
-      await this.adminService.deleteAdmin(req.admin._id as string);
-      res.status(200).json({
-        status: 200,
-        message: "Admin successfully deleted!",
-      });
+      if (req.admin) {
+        await this.adminService.deleteAdmin(req.admin._id as string);
+        res.status(200).json({
+          status: 200,
+          message: "Admin successfully deleted!",
+        });
+      }
     } catch (e) {
       next(e);
     }
