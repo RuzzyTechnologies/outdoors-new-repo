@@ -1,4 +1,4 @@
-import { Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 
 import { ProductController as PC, AuthenticatedRequest } from "../types";
 import { ProductService } from "../services/product.service";
@@ -41,40 +41,38 @@ export class ProductController implements PC {
         !state
       )
         throw new BadRequest(
-          "Bad Request. Fields (title, category, availability, description,size, address, area, state ) cannot be empty"
+          "Bad Request. Fields (title, category, availability, description, size, address, area, state) cannot be empty"
         );
 
-      const product = await this.productService.createProduct(
-        req.admin._id as string,
-        {
-          title,
-          category,
-          availability,
-          description,
-          quantity,
-          featured,
-          size,
-          address,
-        },
-        { stateArea: area, stateName: state }
-      );
+      if (req.admin) {
+        const product = await this.productService.createProduct(
+          req.admin._id as string,
+          {
+            title,
+            category,
+            availability,
+            description,
+            quantity,
+            featured,
+            size,
+            address,
+          },
+          { stateArea: area, stateName: state }
+        );
 
-      res.status(201).json({
-        status: 201,
-        message: "Product added successfully!",
-        data: { product },
-      });
+        res.status(201).json({
+          status: 201,
+          message: "Product added successfully!",
+          data: { product },
+        });
+      }
     } catch (e) {
       next(e);
     }
   }
-  async uploadImage(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) {
+  async uploadImage(req: Request, res: Response, next: NextFunction) {
     try {
-      const { productId } = req.query;
+      const { productId } = req.params;
 
       if (!req.file) throw new BadRequest("Bad Request. File not found");
 
@@ -95,13 +93,9 @@ export class ProductController implements PC {
       next(e);
     }
   }
-  async getSpecificProduct(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) {
+  async getSpecificProduct(req: Request, res: Response, next: NextFunction) {
     try {
-      const { productId } = req.query;
+      const { productId } = req.params;
       const product = await this.productService.getSpecificProduct(
         productId as string
       );
@@ -117,11 +111,7 @@ export class ProductController implements PC {
       next(e);
     }
   }
-  async getAllProducts(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) {
+  async getAllProducts(req: Request, res: Response, next: NextFunction) {
     try {
       const { page, limit } = req.query;
       const getProducts = await this.productService.getAllProducts(
@@ -142,17 +132,13 @@ export class ProductController implements PC {
       next(e);
     }
   }
-  async updateProduct(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) {
+  async updateProduct(req: Request, res: Response, next: NextFunction) {
     try {
       if (Object.keys(req.body).length === 0)
         throw new BadRequest(
           "Bad Request. One of fields( title, category, availability, description, quantity, featured, size, address) cannot be empty"
         );
-      const { productId } = req.query;
+      const { productId } = req.params;
       const product = await this.productService.updateProduct(
         productId as string,
         req.body
@@ -169,22 +155,18 @@ export class ProductController implements PC {
       next(e);
     }
   }
-  async getProductsByArea(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) {
+  async getProductsByArea(req: Request, res: Response, next: NextFunction) {
     try {
       const { page, limit } = req.query;
-      const { state, area } = req.body;
+      const { state, area } = req.query;
       if (!state || !area)
         throw new BadRequest(
           "Bad Request. Field (state and area) cannot be empty."
         );
 
       const getProducts = await this.productService.getProductsByArea(
-        area,
-        state,
+        area as string,
+        state as string,
         Number(page),
         Number(limit)
       );
@@ -202,19 +184,15 @@ export class ProductController implements PC {
       next(e);
     }
   }
-  async getProductsByState(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) {
+  async getProductsByState(req: Request, res: Response, next: NextFunction) {
     try {
       const { page, limit } = req.query;
-      const { state } = req.body;
+      const { state } = req.query;
       if (!state)
         throw new BadRequest("Bad Request. Field (state) cannot be empty.");
 
       const getProducts = await this.productService.getProductsByState(
-        state,
+        state as string,
         Number(page),
         Number(limit)
       );
@@ -232,13 +210,9 @@ export class ProductController implements PC {
       next(e);
     }
   }
-  async deleteProduct(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) {
+  async deleteProduct(req: Request, res: Response, next: NextFunction) {
     try {
-      const { productId } = req.query;
+      const { productId } = req.params;
       await this.productService.deleteProduct(productId as string);
 
       res.status(200).json({

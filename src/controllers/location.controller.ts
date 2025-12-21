@@ -1,6 +1,6 @@
-import { Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 
-import { LocationController as LC, AuthenticatedRequest } from "../types";
+import { LocationController as LC } from "../types";
 import { LocationService } from "../services/location.service";
 import { BadRequest } from "../utils/error";
 
@@ -11,11 +11,7 @@ export class LocationController implements LC {
     this.locationService = new LocationService();
   }
 
-  async createState(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) {
+  async createState(req: Request, res: Response, next: NextFunction) {
     try {
       const { state } = req.body;
       if (!state)
@@ -33,11 +29,7 @@ export class LocationController implements LC {
       next(e);
     }
   }
-  async createArea(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) {
+  async createArea(req: Request, res: Response, next: NextFunction) {
     try {
       const { area, state } = req.body;
       if (!area || !state)
@@ -61,7 +53,7 @@ export class LocationController implements LC {
     }
   }
 
-  async getArea(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  async getArea(req: Request, res: Response, next: NextFunction) {
     try {
       const { area, state } = req.query;
 
@@ -80,7 +72,7 @@ export class LocationController implements LC {
       next(e);
     }
   }
-  async getState(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  async getState(req: Request, res: Response, next: NextFunction) {
     try {
       const { state } = req.query;
 
@@ -96,11 +88,7 @@ export class LocationController implements LC {
       next(e);
     }
   }
-  async getAllStates(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) {
+  async getAllStates(req: Request, res: Response, next: NextFunction) {
     try {
       const { page, limit } = req.query;
       const getStates = await this.locationService.getAllStates(
@@ -122,16 +110,16 @@ export class LocationController implements LC {
     }
   }
   async getAllAreasInASpecificState(
-    req: AuthenticatedRequest,
+    req: Request,
     res: Response,
     next: NextFunction
   ) {
     try {
       const { page, limit } = req.query;
-      const { state } = req.body;
+      const { state } = req.query;
 
       if (!state)
-        throw new BadRequest("Bad Requtest. Field (state) cannot be empty");
+        throw new BadRequest("Bad Request. Field (state) cannot be empty");
 
       const getAllAreasInASpecificState =
         await this.locationService.getAllAreasInASpecificState(
