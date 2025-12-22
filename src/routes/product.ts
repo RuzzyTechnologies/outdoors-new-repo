@@ -7,30 +7,26 @@ const router = Router();
 const productController = new ProductController();
 const { auth } = new Auth();
 
-router.post("/product/create", auth, productController.addProduct);
+router.post("/products/", auth, productController.addProduct);
+
+router.post("/products/:productId/image", auth, productController.uploadImage);
 
 router.patch(
-  "/product/uploadImage/:productId",
-  auth,
-  productController.uploadImage
-);
-
-router.patch(
-  "/product/update/:productId",
+  "/products/update/:productId",
   auth,
   productController.updateProduct
 );
 
-router.get("/product/:productId", auth, productController.getSpecificProduct);
+router.get("/products/:productId", auth, productController.getSpecificProduct);
 
 router.get("/products", auth, productController.getAllProducts);
 
-router.get("/productsByArea", auth, productController.getProductsByArea);
+router.get("/products/by-area", auth, productController.getProductsByArea);
 
-router.get("/productsByState", auth, productController.getProductsByState);
+router.get("/products/by-state", auth, productController.getProductsByState);
 
 router.delete(
-  "/product/delete/:productId",
+  "/products/delete/:productId",
   auth,
   productController.deleteProduct
 );

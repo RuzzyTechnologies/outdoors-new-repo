@@ -7,22 +7,22 @@ const router = Router();
 const userController = new UserController();
 const { auth } = new Auth("user");
 
-router.post("/signup", userController.signup);
+router.post("/users/signup", userController.signup);
 
-router.post("/login", userController.login);
+router.post("/users/login", userController.login);
 
-router.post("/logout", auth, userController.logout);
+router.post("/users/logout", auth, userController.logout);
 
-router.post("/logoutAll", auth, userController.logoutFromAllDevices);
+router.post("/users/logoutAll", auth, userController.logoutFromAllDevices);
 
-router.get("/profile", auth, userController.getUser);
+router.get("/users/profile", auth, userController.getUser);
 
-router.patch("/updateInfo", auth, userController.updateUser);
+router.patch("/users/updateInfo", auth, userController.updateUser);
 
-router.patch("/uploadAvatar", auth, userController.uploadAvatar);
+router.post("/users/avatar", auth, userController.uploadAvatar);
 
-router.patch("/updatePassword", auth, userController.updateUserPassword);
+router.patch("/users/updatePassword", auth, userController.updateUserPassword);
 
-router.patch("/deleteAdmin", auth, userController.softDeleteUser);
+router.patch("users/delete", auth, userController.softDeleteUser);
 
 export default router;

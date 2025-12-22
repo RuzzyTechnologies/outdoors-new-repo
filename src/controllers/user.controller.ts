@@ -12,6 +12,41 @@ export class UserController implements UC {
     this.userService = new UserService();
   }
 
+  /**
+   * @openapi
+   * /api/v1/users/signup:
+   *   post:
+   *     summary: User signup
+   *     description: Create an user account
+   *     tags:
+   *       - User
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/UserlogRequest"
+   *     responses:
+   *       201:
+   *         description: User logged in successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/UserResponse"
+   *       400:
+   *         description: Invalid request payload
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal Server Error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *
+   */
   async signup(req: Request, res: Response, next: NextFunction) {
     try {
       const { fullName, email, phoneNo, password, companyName, position } =
@@ -41,6 +76,37 @@ export class UserController implements UC {
       next(e);
     }
   }
+
+  /**
+   * @openapi
+   * /api/v1/users/logoutAll:
+   *   post:
+   *     summary: User logout
+   *     description: Logs out the currently authenticated User from all registered devices
+   *     tags:
+   *       - User
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Logout successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/UserLogoutResponse"
+   *       401:
+   *         description: Unauthorized
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   */
   async logoutFromAllDevices(
     req: AuthRequest,
     res: Response,
@@ -56,6 +122,47 @@ export class UserController implements UC {
       next(e);
     }
   }
+
+  /**
+   * @openapi
+   * /api/v1/users/login:
+   *   post:
+   *     summary: User login
+   *     description: Log in to an user account
+   *     tags:
+   *       - User
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/UserLoginRequest"
+   *     responses:
+   *       200:
+   *         description: Login successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/UserResponse"
+   *       400:
+   *         description: Invalid credentials or malformed request
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       401:
+   *         description: Unauthorized
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   */
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;
@@ -82,6 +189,37 @@ export class UserController implements UC {
       next(e);
     }
   }
+
+  /**
+   * @openapi
+   * /api/v1/users/logout:
+   *   post:
+   *     summary: User logout
+   *     description: Logs out the currently authenticated user
+   *     tags:
+   *       - User
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Logout successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/UserLogoutResponse"
+   *       401:
+   *         description: Unauthorized
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   */
   async logout(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       await this.userService.logout(req);
@@ -93,6 +231,38 @@ export class UserController implements UC {
       next(e);
     }
   }
+
+  /**
+   * @openapi
+   * /api/v1/users/profile:
+   *   get:
+   *     summary: User profile
+   *     description: Fetches user profile/data
+   *     tags:
+   *       - User
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Fetch successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/UserResponse"
+   *       401:
+   *         description: Unauthorized
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   */
+
   async getUser(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       res.status(200).json({
@@ -106,6 +276,50 @@ export class UserController implements UC {
       next(e);
     }
   }
+
+  /**
+   * @openapi
+   * /api/v1/users/updateInfo:
+   *   patch:
+   *     summary: Update user profile
+   *     description: Update one or more user fields
+   *     tags:
+   *       - User
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/UpdateUserRequest"
+   *     responses:
+   *       200:
+   *         description: User updated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/UserResponse"
+   *       400:
+   *         description: Empty or invalid request body
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       401:
+   *         description: Unauthorized
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   */
+
   async updateUser(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (Object.keys(req.body).length === 0)
@@ -136,6 +350,50 @@ export class UserController implements UC {
       next(e);
     }
   }
+
+  /**
+   * @openapi
+   * /api/v1/users/updatePassword:
+   *   patch:
+   *     summary: Update user profile
+   *     description: Update one or more user fields
+   *     tags:
+   *       - User
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/UpdateUserPasswordRequest"
+   *     responses:
+   *       200:
+   *         description: User updated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/UserResponse"
+   *       400:
+   *         description: Empty or invalid request body
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       401:
+   *         description: Unauthorized
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   */
+
   async updateUserPassword(
     req: AuthRequest,
     res: Response,
@@ -158,6 +416,37 @@ export class UserController implements UC {
       next(e);
     }
   }
+
+  /**
+   * @openapi
+   * /api/v1/users/delete:
+   *   delete:
+   *     summary: Soft delete user account
+   *     description: Permanently delete the currently authenticated user account
+   *     tags:
+   *       - User
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: User deleted successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/DeleteUserResponse"
+   *       401:
+   *         description: Unauthorized
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   */
   async softDeleteUser(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (req.user) {
@@ -171,6 +460,49 @@ export class UserController implements UC {
       next(e);
     }
   }
+
+  /**
+   * @openapi
+   * /api/v1/users/avatar:
+   *   post:
+   *     summary: Upload user avatar
+   *     description: Upload and update the authenticated user's avatar image
+   *     tags:
+   *       - User
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         multipart/form-data:
+   *           schema:
+   *             $ref: "#/components/schemas/UploadAvatarRequest"
+   *     responses:
+   *       200:
+   *         description: Avatar uploaded successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/UploadAvatarResponse"
+   *       400:
+   *         description: File not found or invalid upload
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       401:
+   *         description: Unauthorized
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   */
 
   async uploadAvatar(req: AuthRequest, res: Response, next: NextFunction) {
     try {

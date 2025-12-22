@@ -20,20 +20,6 @@ const swaggerDefinition: SwaggerDefinition = {
       description: "Live server",
     },
   ],
-  components: {
-    securitySchemes: {
-      bearerAuth: {
-        type: "http",
-        scheme: "bearer",
-        bearerFormat: "JWT",
-      },
-    },
-  },
-  security: [
-    {
-      bearerAuth: [],
-    },
-  ],
   externalDocs: {
     url: "docs",
   },
@@ -41,7 +27,7 @@ const swaggerDefinition: SwaggerDefinition = {
 
 const options = {
   definition: swaggerDefinition,
-  apis: ["./src/routes/*.ts"],
+  apis: ["./src/openapi/*.ts", "./src/routes/*.ts"],
 };
 
 export const specs = swaggerJSDoc(options);

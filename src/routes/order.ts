@@ -7,9 +7,9 @@ const router = Router();
 const orderController = new OrderController();
 const { auth } = new Auth("user");
 
-router.post("/order/create/:productId", auth, orderController.createOrder);
+router.post("/orders/:productId", auth, orderController.createOrder);
 
-router.get("/order/:orderId", auth, orderController.findSpecificOrder);
+router.get("/orders/:orderId", auth, orderController.findSpecificOrder);
 
 router.get("/orders", auth, orderController.getAllOrders);
 

@@ -11,6 +11,42 @@ export class LocationController implements LC {
     this.locationService = new LocationService();
   }
 
+  /**
+   * @openapi
+   * /api/v1/locations/state:
+   *   post:
+   *     summary: Create a state
+   *     description: Create a new state location
+   *     tags:
+   *       - Location
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/CreateStateRequest"
+   *     responses:
+   *       201:
+   *         description: State created successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/LocationResponse"
+   *       400:
+   *         description: Invalid request payload
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   */
   async createState(req: Request, res: Response, next: NextFunction) {
     try {
       const { state } = req.body;
@@ -29,6 +65,44 @@ export class LocationController implements LC {
       next(e);
     }
   }
+
+  /**
+   * @openapi
+   * /api/v1/locations/area:
+   *   post:
+   *     summary: Create an area within a state
+   *     description: Create a new area under an existing state
+   *     tags:
+   *       - Location
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/CreateAreaRequest"
+   *     responses:
+   *       201:
+   *         description: Area created successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/LocationResponse"
+   *       400:
+   *         description: Invalid request payload
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   */
+
   async createArea(req: Request, res: Response, next: NextFunction) {
     try {
       const { area, state } = req.body;
@@ -53,6 +127,61 @@ export class LocationController implements LC {
     }
   }
 
+  /**
+   * @openapi
+   * /api/v1/locations/area:
+   *   get:
+   *     summary: Get an area by name and state
+   *     description: Fetch a specific area within a state
+   *     tags:
+   *       - Location
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: area
+   *         required: true
+   *         schema:
+   *           type: string
+   *         example: Ikeja
+   *       - in: query
+   *         name: state
+   *         required: true
+   *         schema:
+   *           type: string
+   *         example: Lagos
+   *     responses:
+   *       200:
+   *         description: Area fetched successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: integer
+   *                   example: 200
+   *                 message:
+   *                   type: string
+   *                   example: Area fetched successfully!
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     area:
+   *                       $ref: "#/components/schemas/Location"
+   *       400:
+   *         description: Invalid query parameters
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   */
   async getArea(req: Request, res: Response, next: NextFunction) {
     try {
       const { area, state } = req.query;
@@ -72,6 +201,56 @@ export class LocationController implements LC {
       next(e);
     }
   }
+
+  /**
+   * @openapi
+   * /api/v1/locations/state:
+   *   get:
+   *     summary: Get a state by name
+   *     description: Fetch a state location
+   *     tags:
+   *       - Location
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: state
+   *         required: true
+   *         schema:
+   *           type: string
+   *         example: Lagos
+   *     responses:
+   *       200:
+   *         description: State fetched successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: integer
+   *                   example: 200
+   *                 message:
+   *                   type: string
+   *                   example: State fetched successfully!
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     area:
+   *                       $ref: "#/components/schemas/Location"
+   *       400:
+   *         description: Invalid query parameter
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   */
   async getState(req: Request, res: Response, next: NextFunction) {
     try {
       const { state } = req.query;
@@ -88,6 +267,53 @@ export class LocationController implements LC {
       next(e);
     }
   }
+
+  /**
+   * @openapi
+   * /api/v1/locations/states/all:
+   *   get:
+   *     summary: Get all states
+   *     description: Fetch all states with pagination
+   *     tags:
+   *       - Location
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: page
+   *         required: false
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *         example: 1
+   *       - in: query
+   *         name: limit
+   *         required: false
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *         example: 10
+   *     responses:
+   *       200:
+   *         description: States fetched successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/GetAllStatesResponse"
+   *       400:
+   *         description: Invalid pagination parameters
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   */
+
   async getAllStates(req: Request, res: Response, next: NextFunction) {
     try {
       const { page, limit } = req.query;
@@ -109,6 +335,59 @@ export class LocationController implements LC {
       next(e);
     }
   }
+
+  /**
+   * @openapi
+   * /api/v1/locations/areas:
+   *   get:
+   *     summary: Get all areas in a specific state
+   *     description: Fetch paginated areas belonging to a given state
+   *     tags:
+   *       - Location
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: state
+   *         required: true
+   *         schema:
+   *           type: string
+   *         example: Lagos
+   *       - in: query
+   *         name: page
+   *         required: false
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *         example: 1
+   *       - in: query
+   *         name: limit
+   *         required: false
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *         example: 10
+   *     responses:
+   *       200:
+   *         description: Areas fetched successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/GetAllAreasResponse"
+   *       400:
+   *         description: State query parameter is missing
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/ErrorResponse"
+   */
+
   async getAllAreasInASpecificState(
     req: Request,
     res: Response,
