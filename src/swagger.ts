@@ -1,4 +1,7 @@
 import swaggerJSDoc, { SwaggerDefinition } from "swagger-jsdoc";
+import type { Express } from "express";
+import expressBasicAuth from "express-basic-auth";
+import swaggerUi from "swagger-ui-express";
 
 const PORT = process.env.PORT || 4500;
 
@@ -31,3 +34,28 @@ const options = {
 };
 
 export const specs = swaggerJSDoc(options);
+
+export function setupSwagger(app: Express, specs: object) {
+  if (process.env.NODE_ENV === "production") {
+    return;
+  }
+
+  const swaggerAuth = expressBasicAuth({
+    users: {
+      [process.env.SWAGGER_USER as string]: process.env.SWAGGER_PASS as string,
+    },
+    challenge: true,
+    realm: "API Documentation",
+  });
+
+  app.use(
+    "/docs",
+    swaggerAuth,
+    swaggerUi.serve,
+    swaggerUi.setup(specs, {
+      swaggerOptions: {
+        supportedSubmitMethods: [],
+      },
+    })
+  );
+}

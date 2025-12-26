@@ -9,9 +9,10 @@ services:
       target: dev
     init: true
     ports:
-      - "4323:4323"
+      - "4500:4500"
     depends_on:
       - db
+      - redis
     volumes:
       - type: bind
         source: ./
@@ -28,6 +29,13 @@ services:
       - CLOUD_NAME=${CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - NODE_ENV=${NODE_ENV}
+      - SWAGGER_USER=${SWAGGER_USER}
+      - SWAGGER_PASS=${SWAGGER_PASS}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - PORT=${PORT}
+      - REDIS_URL=${REDIS_URL}
     restart: unless-stopped
 
   db:
@@ -40,6 +48,20 @@ services:
       - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
     volumes:
       - mongo-data:/data/db
+  redis:
+    image: redis:8.4.0
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command:
+      - sh
+      - -c
+      - |
+        redis-server --requirepass "$REDIS_PASSWORD"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
 
 volumes:
   mongo-data:
+  redis-data:

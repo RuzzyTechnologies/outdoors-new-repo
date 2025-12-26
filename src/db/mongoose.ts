@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
+import { logger } from "../utils/logger";
 
 mongoose.connect(`${process.env.MONGO_URL}`).then(() => {
-  console.log("Database Connected!");
+  logger.info("Database Connected!");
 });

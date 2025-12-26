@@ -1,5 +1,5 @@
 import http from "http";
-import { logger } from "./src/utils/logger";
+import { logger } from "../src/utils/logger";
 
 const options = {
   timeout: 2000,

@@ -148,12 +148,7 @@
  *           properties:
  *             product:
  *               $ref: "#/components/schemas/Product"
- */
-
-/**
- * @openapi
- * components:
- *   schemas:
+ *
  *     UpdateProductRequest:
  *       type: object
  *       properties:
