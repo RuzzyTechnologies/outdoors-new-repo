@@ -9,7 +9,7 @@ services:
       target: dev
     init: true
     ports:
-      - "4500:4500"
+      - "4323:4323"
     depends_on:
       - db
       - redis

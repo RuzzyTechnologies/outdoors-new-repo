@@ -16,11 +16,11 @@ export class Auth {
     this.owner = owner;
   }
 
-  async auth(
+  auth = async (
     req: AuthenticatedRequest & AuthRequest,
     _res: Response,
     next: NextFunction
-  ) {
+  ) => {
     try {
       const header = req.headers.authorization;
 
@@ -44,33 +44,34 @@ export class Auth {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   private async tokenValidator(token: string) {
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
 
     if (this.owner === "admin") {
       const { _id, username } = decoded;
+      if (!_id || !username) throw new Unauthorized("Please authenticate!");
       const admin = await this.adminRepository.findOne({
         _id,
         username,
+        "tokens.token": token
       });
 
-      if (!admin) throw new NotFound("Admin doesn't exist");
-
-      const { password, ...safeAdmin } = admin;
-      return safeAdmin;
+      if (!admin) throw new Unauthorized("Please authenticate!");
+      return admin.toJSON();
     }
 
     const { _id, email } = decoded;
+    if (!_id || email) throw new Unauthorized("Please authenticate!");
     const user = await this.userRepository.findOne({
       _id,
       email,
+      "tokens.token": token
     });
 
-    if (!user) throw new NotFound("User doesn't exist");
+    if (!user) throw new Unauthorized("Please authenticate!");
 
-    const { password, ...safeUser } = user;
-    return safeUser;
+    return user.toJSON();
   }
 }

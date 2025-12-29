@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { logger } from "../utils/logger";
 
 export function invalidRoute(req: Request, res: Response) {
   return res.status(404).json({
@@ -16,7 +17,7 @@ export function errorMiddleware(
   _next: NextFunction
 ) {
   return res.status(err.status || 500).json({
-    status: 500,
+    status: err.status || 500,
     message: err.message || "Internal Server Error",
   });
 }

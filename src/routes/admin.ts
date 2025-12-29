@@ -25,6 +25,6 @@ router.patch(
   adminController.updateAdminPassword
 );
 
-router.patch("/admin/delete", auth, adminController.deleteAdmin);
+router.delete("/admin/delete", auth, adminController.deleteAdmin);
 
 export default router;

@@ -1,6 +1,11 @@
 import { Admin } from "../models/admin";
 import { Conflict, InternalServerError, NotFound } from "../utils/error";
-import type { adminOptions, loginOptions, adminUpdateFields } from "../types";
+import type {
+  adminOptions,
+  loginOptions,
+  adminUpdateFields,
+  AdminDocument,
+} from "../types";
 import { AdminService as AS } from "../types";
 import { logger } from "../utils/logger";
 import { ObjectId } from "mongodb";
@@ -70,11 +75,16 @@ export class AdminService implements AS {
 
   async logout(req: any) {
     try {
-      req.admin.tokens = req.admin.tokens.filter(
+      const admin = await this.adminRepository.findOne({
+        _id: req.admin._id,
+      });
+
+      if (!admin) throw new NotFound("Admin not found");
+
+      admin.tokens = admin.tokens.filter(
         (token: any) => token.token !== req.token
       );
-
-      await req.admin.save();
+      await admin.save();
 
       logger.info("Admin successfully logged out...");
     } catch (e: any) {
@@ -85,8 +95,14 @@ export class AdminService implements AS {
 
   async logoutFromAllDevices(req: any) {
     try {
-      req.admin.tokens = [];
-      await req.admin.save();
+      const admin = await this.adminRepository.findOne({
+        _id: req.admin._id,
+      });
+
+      if (!admin) throw new NotFound("Admin not found");
+
+      admin.tokens = [];
+      await admin.save();
       logger.info("Admin successfully logged out...");
     } catch (e: any) {
       logger.error("Error logging admin out...");
@@ -94,13 +110,16 @@ export class AdminService implements AS {
     }
   }
 
-  async updateAdminInfo(id: string, payload: adminUpdateFields) {
+  async updateAdminInfo(id: ObjectId, payload: adminUpdateFields) {
     try {
-      const _id = new ObjectId(String(id));
-      const admin = await this.adminRepository.findOneAndUpdate(_id, payload, {
-        new: true,
-        runValidators: true,
-      });
+      const admin = await this.adminRepository.findOneAndUpdate(
+        { _id: id },
+        payload,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
       if (!admin) throw new NotFound(`Admin doesn't exist`);
 
       logger.info("Admin info updated...");
@@ -108,16 +127,15 @@ export class AdminService implements AS {
     } catch (e) {
       if (e instanceof NotFound) throw e;
 
-      logger.error(`Error updating fields...`);
-      throw new InternalServerError(`Error updating fields`);
+      logger.error(`Error updating admin...`);
+      throw new InternalServerError(`Error updating admin`);
     }
   }
 
-  async updatePassword(id: string, password: string) {
+  async updatePassword(id: ObjectId, password: string) {
     try {
-      const _id = new ObjectId(String(id));
       const admin = await this.adminRepository.findOneAndUpdate(
-        _id,
+        { _id: id },
         { password },
         {
           new: true,
@@ -136,10 +154,9 @@ export class AdminService implements AS {
     }
   }
 
-  async deleteAdmin(id: string) {
+  async deleteAdmin(id: ObjectId) {
     try {
-      const _id = new ObjectId(String(id));
-      const admin = await this.adminRepository.findByIdAndDelete(_id);
+      const admin = await this.adminRepository.findByIdAndDelete({ _id: id });
       if (!admin) throw new NotFound(`Admin doesn't exist`);
 
       logger.info("Admin successfully deleted");

@@ -4,6 +4,7 @@ import { AdminController as AC, AuthenticatedRequest } from "../types";
 import { AdminService } from "../services/admin.service";
 
 import { BadRequest } from "../utils/error";
+import { ObjectId } from "mongodb";
 
 export class AdminController implements AC {
   private adminService: AdminService;
@@ -47,8 +48,13 @@ export class AdminController implements AC {
    *
    */
 
-  async signup(req: Request, res: Response, next: NextFunction) {
+  signup = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.body)
+        throw new BadRequest(
+          "Bad Request. Fields (firstName, lastName, username, email, password) cannot be empty!"
+        );
+
       const { firstName, lastName, username, email, password } = req.body;
 
       if (!firstName || !lastName || !username || !email || !password)
@@ -74,7 +80,7 @@ export class AdminController implements AC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -117,8 +123,12 @@ export class AdminController implements AC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async login(req: Request, res: Response, next: NextFunction) {
+  login = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.body)
+        throw new BadRequest(
+          "Bad Request. Fields (email and password) cannot be empty"
+        );
       const { email, password } = req.body;
 
       if (!email || !password)
@@ -142,7 +152,7 @@ export class AdminController implements AC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -175,7 +185,11 @@ export class AdminController implements AC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async logout(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  logout = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       await this.adminService.logout(req);
       res.status(200).json({
@@ -185,7 +199,7 @@ export class AdminController implements AC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -217,11 +231,11 @@ export class AdminController implements AC {
    *             schema:
    *               $ref: "#/components/schemas/ErrorResponse"
    */
-  async logoutFromAllDevices(
+  logoutFromAllDevices = async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     try {
       await this.adminService.logoutFromAllDevices(req);
       res.status(200).json({
@@ -231,7 +245,7 @@ export class AdminController implements AC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -320,22 +334,32 @@ export class AdminController implements AC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async updateAdmin(
+  updateAdmin = async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     try {
-      if (Object.keys(req.body).length === 0)
+      if (!req.body || Object.keys(req.body).length === 0)
         throw new BadRequest(
           "Bad Request. One of fields (username, firstName, and lastName) cannot be empty"
+        );
+      const updates = Object.keys(req.body);
+      const validOptions = ["firstName", "lastName", "username"];
+      const validUpdates = updates.every((update) =>
+        validOptions.includes(update)
+      );
+
+      if (!validUpdates)
+        throw new BadRequest(
+          "Bad Request. Only fields (username, firstName, and lastName) are allowed"
         );
       const { firstName, lastName, username } = req.body;
 
       if (req.admin) {
         const updatedAdmin = await this.adminService.updateAdminInfo(
-          req.admin._id as string,
-          { firstName, lastName, username }
+          req.admin._id as ObjectId,
+          { firstName, username, lastName }
         );
 
         res.status(200).json({
@@ -349,7 +373,7 @@ export class AdminController implements AC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -394,19 +418,30 @@ export class AdminController implements AC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async updateAdminPassword(
+  updateAdminPassword = async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     try {
+      if (!req.body || Object.keys(req.body).length === 0)
+        throw new BadRequest("Bad Request. Field (password) cannot be empty");
+      const updates = Object.keys(req.body);
+      const validOptions = ["password"];
+      const validUpdates = updates.every((update) =>
+        validOptions.includes(update)
+      );
+
+      if (!validUpdates)
+        throw new BadRequest("Bad Request. Only field (password) is allowed");
+
       const { password } = req.body;
       if (!password)
         throw new BadRequest("Bad Request. Fields (password) cannot be empty");
 
       if (req.admin) {
         const updatedAdmin = await this.adminService.updatePassword(
-          req.admin._id as string,
+          req.admin._id as ObjectId,
           password
         );
 
@@ -421,7 +456,7 @@ export class AdminController implements AC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -454,14 +489,14 @@ export class AdminController implements AC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async deleteAdmin(
+  deleteAdmin = async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     try {
       if (req.admin) {
-        await this.adminService.deleteAdmin(req.admin._id as string);
+        await this.adminService.deleteAdmin(req.admin._id as ObjectId);
         res.status(200).json({
           status: 200,
           message: "Admin successfully deleted!",
@@ -470,5 +505,5 @@ export class AdminController implements AC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 }

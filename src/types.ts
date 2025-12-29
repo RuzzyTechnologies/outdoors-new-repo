@@ -9,11 +9,11 @@ export interface AdminService {
   login: (payload: loginOptions) => Promise<tokenizedAdmin>;
   logout: (payload: any) => Promise<void>;
   updateAdminInfo: (
-    id: string,
+    id: ObjectId,
     paylaod: adminUpdateFields
   ) => Promise<AdminDocument>;
-  updatePassword: (id: string, password: string) => Promise<AdminDocument>;
-  deleteAdmin: (id: string) => Promise<AdminDocument>;
+  updatePassword: (id: ObjectId, password: string) => Promise<AdminDocument>;
+  deleteAdmin: (id: ObjectId) => Promise<AdminDocument>;
 }
 
 export interface AdminController {

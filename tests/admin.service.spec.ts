@@ -15,13 +15,6 @@ jest.mock("../src/utils/argon", () => ({
 }));
 
 jest.mock("../src/models/admin", () => {
-  // Admin: {
-  //   findOne: jest.fn(),
-  //   prototype: {
-  //     save: jest.fn(),
-  //   },
-  // },
-
   const mockAdmin: any = jest.fn();
   mockAdmin.findOne = jest.fn();
   mockAdmin.findOneAndUpdate = jest.fn();
@@ -146,44 +139,49 @@ describe("AdminService", () => {
   });
 
   test("should log out user from a device", async () => {
-    const mockSave = jest.fn().mockResolvedValue({});
+    const mockInstance = {
+      save: jest.fn().mockResolvedValue(true),
+      tokens: [{ token: "token-123" }, { token: "token-124" }],
+    };
+
+    const findOne = Admin.findOne as jest.Mock;
+    findOne.mockResolvedValue(mockInstance);
 
     const req = {
+      admin: { _id: new ObjectId() },
       token: "token-123",
-      admin: {
-        tokens: [{ token: "token-123" }, { token: "token34343" }],
-        save: mockSave,
-      },
     };
 
     await adminService.logout(req);
 
-    expect(req.admin.tokens).toEqual([{ token: "token34343" }]);
-    expect(mockSave).toHaveBeenCalled();
+    expect(mockInstance.tokens).toEqual([{ token: "token-124" }]);
+    expect(mockInstance.save).toHaveBeenCalled();
   });
 
   test("should log out user from all devices", async () => {
-    const mockSave = jest.fn().mockResolvedValue({});
-
-    const req = {
-      token: "token-123",
-      admin: {
-        tokens: [{ token: "token-123" }, { token: "token34343" }],
-        save: mockSave,
-      },
+    const mockInstance = {
+      save: jest.fn().mockResolvedValue(true),
+      tokens: [{ token: "token-123" }, { token: "token-124" }],
     };
 
+    const findOne = Admin.findOne as jest.Mock;
+    findOne.mockResolvedValue(mockInstance);
+
+    const req = {
+      admin: { _id: new ObjectId() },
+      token: "token-123",
+    };
     await adminService.logoutFromAllDevices(req);
 
-    expect(req.admin.tokens).toEqual([]);
-    expect(mockSave).toHaveBeenCalled();
+    expect(mockInstance.tokens).toEqual([]);
+    expect(mockInstance.save).toHaveBeenCalled();
   });
 
   test("should throw a NOTFOUND error if admin doesnt exist", () => {
     const admin = Admin.findOneAndUpdate as jest.Mock;
     admin.mockResolvedValue(null);
 
-    const id = "123455678902";
+    const id = new ObjectId();
 
     const payload = {
       firstName: "Sam",
@@ -196,7 +194,7 @@ describe("AdminService", () => {
   });
 
   test("should update provided fields if admin exists", async () => {
-    const id = "123455678902";
+    const id = new ObjectId();
 
     const admin = Admin.findOneAndUpdate as jest.Mock;
     admin.mockResolvedValue({ _id: id, firstName: "John" });
@@ -214,7 +212,7 @@ describe("AdminService", () => {
     const admin = Admin.findOneAndUpdate as jest.Mock;
     admin.mockResolvedValue(null);
 
-    const id = "123455678902";
+    const id = new ObjectId();
     const password = "123433ioo";
 
     expect(adminService.updatePassword(id, password)).rejects.toThrow(NotFound);
@@ -222,7 +220,7 @@ describe("AdminService", () => {
   });
 
   test("should update provided fields if admin exists (password update)", async () => {
-    const id = "123455678902";
+    const id = new ObjectId();
 
     const admin = Admin.findOneAndUpdate as jest.Mock;
     admin.mockResolvedValue({ _id: id, password: "hashedPas234" });
@@ -238,14 +236,14 @@ describe("AdminService", () => {
     const admin = Admin.findByIdAndDelete as jest.Mock;
     admin.mockResolvedValue(null);
 
-    const id = "123455678902";
+    const id = new ObjectId();
 
     expect(adminService.deleteAdmin(id)).rejects.toThrow(NotFound);
     expect(ObjectId).toHaveBeenCalled();
   });
 
   test("should successfully delete admin if found", async () => {
-    const id = "123455678902";
+    const id = new ObjectId();
     const mockAdmin = { _id: id, firstName: "John" };
 
     const admin = Admin.findByIdAndDelete as jest.Mock;

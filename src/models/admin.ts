@@ -27,15 +27,15 @@ const adminSchema = new Schema(
       trim: true,
     },
     username: {
+      unique: true,
       type: String,
       required: [true, ERR_USERNAME_REQUIRED],
       trim: true,
-      unique: true,
     },
     email: {
+      unique: [true, ERR_EMAIL_EXISTS],
       type: String,
       required: [true, ERR_EMAIL_REQUIRED],
-      unique: [true, ERR_EMAIL_EXISTS],
       trim: true,
       validate(value: string) {
         return isEmail(value);
