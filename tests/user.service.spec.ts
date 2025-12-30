@@ -43,14 +43,14 @@ describe("UserService", () => {
     const user = User.findOne as jest.Mock;
     user.mockResolvedValueOnce(null);
 
-    const id = "12345rtt67543";
+    const id = new ObjectId();
 
     await expect(userService.getSpecificUser(id)).rejects.toThrow(NotFound);
     expect(ObjectId).toHaveBeenCalled();
   });
 
   test("Should return a specific user if found.", async () => {
-    const id = "12345rtt67543";
+    const id = new ObjectId();
     const mockValue = { _id: id, firstName: "John" };
 
     const user = User.findOne as jest.Mock;
@@ -68,7 +68,7 @@ describe("UserService", () => {
     const payload = {
       fullName: "james",
       email: "str@example.com",
-      phoneNo: 823323232,
+      phoneNo: "823323232",
       password: "qwertthup12.",
       companyName: "ShowBizLLC",
       position: "manager",
@@ -87,7 +87,7 @@ describe("UserService", () => {
     const payload = {
       fullName: "james",
       email: "str@example.com",
-      phoneNo: 823323232,
+      phoneNo: "823323232",
       password: "qwertthup12.",
       companyName: "ShowBizLLC",
       position: "manager",
@@ -115,7 +115,7 @@ describe("UserService", () => {
     const payload = {
       fullName: "james",
       email: "str@example.com",
-      phoneNo: 823323232,
+      phoneNo: "823323232",
       password: "qwertthup12.",
       companyName: "ShowBizLLC",
       position: "manager",
@@ -151,43 +151,48 @@ describe("UserService", () => {
   });
 
   test("should log out user from a device", async () => {
-    const mockSave = jest.fn().mockResolvedValue({});
-
-    const req = {
-      token: "token-123",
-      user: {
-        tokens: [{ token: "token-123" }, { token: "token34343" }],
-        save: mockSave,
-      },
+    const mockInstance = {
+      save: jest.fn().mockResolvedValue(true),
+      tokens: [{ token: "token-123" }, { token: "token-124" }],
     };
 
+    const findOne = User.findOne as jest.Mock;
+    findOne.mockResolvedValue(mockInstance);
+
+    const req = {
+      user: { _id: new ObjectId() },
+      token: "token-123",
+    };
     await userService.logout(req);
 
-    expect(req.user.tokens).toEqual([{ token: "token34343" }]);
-    expect(mockSave).toHaveBeenCalled();
+    expect(mockInstance.tokens).toEqual([{ token: "token-124" }]);
+    expect(mockInstance.save).toHaveBeenCalled();
   });
 
   test("should log user out from all devices", async () => {
-    const mockSave = jest.fn().mockResolvedValue({});
-
-    const req = {
-      token: "tokena-134",
-      user: {
-        tokens: [{ token: "token-2322" }, { token: "eerertpkem" }],
-        save: mockSave,
-      },
+    const mockInstance = {
+      save: jest.fn().mockResolvedValue(true),
+      tokens: [{ token: "token-123" }, { token: "token-124" }],
     };
 
+    const findOne = User.findOne as jest.Mock;
+    findOne.mockResolvedValue(mockInstance);
+
+    const req = {
+      user: { _id: new ObjectId() },
+      token: "token-123",
+    };
     await userService.logoutFromAllDevices(req);
-    expect(req.user.tokens).toEqual([]);
-    expect(mockSave).toHaveBeenCalled();
+
+    expect(mockInstance.tokens).toEqual([]);
+    expect(mockInstance.save).toHaveBeenCalled();
   });
 
   test("should throw a NOTFOUND error if user doesnt exist (updateUserInfo)", () => {
     const user = User.findOneAndUpdate as jest.Mock;
     user.mockResolvedValue(null);
 
-    const id = "223456789";
+    const id = new ObjectId();
 
     const payload = {
       fullName: "whatever",
@@ -209,7 +214,7 @@ describe("UserService", () => {
     };
     const user = User.findOneAndUpdate as jest.Mock;
     user.mockResolvedValue(mockValue);
-    const id = "223456789";
+    const id = new ObjectId();
 
     const payload = {
       fullName: "whatever",
@@ -227,7 +232,7 @@ describe("UserService", () => {
     const user = User.findOneAndUpdate as jest.Mock;
     user.mockResolvedValue(null);
 
-    const id = "223456789";
+    const id = new ObjectId();
 
     const password = "tokendtgshsjkm";
 
@@ -244,7 +249,7 @@ describe("UserService", () => {
     };
     const user = User.findOneAndUpdate as jest.Mock;
     user.mockResolvedValue(mockValue);
-    const id = "223456789";
+    const id = new ObjectId();
 
     const password = "tokendtgshsjkm";
     const updateInfo = await userService.updatePassword(id, password);
@@ -253,29 +258,31 @@ describe("UserService", () => {
     expect(ObjectId).toHaveBeenCalled();
   });
 
-  test("should throw a NOTFOUND error if user doesnt exist (deletePassword)", () => {
+  test("should throw a NOTFOUND error if user doesnt exist (deleteUser)", () => {
     const user = User.findByIdAndUpdate as jest.Mock;
     user.mockResolvedValue(null);
 
-    const id = "223456789";
+    const id = new ObjectId();
     expect(userService.deleteUser(id)).rejects.toThrow(NotFound);
     expect(ObjectId).toHaveBeenCalled();
   });
 
-  test("should delete a user if user exists (deletePassword)", async () => {
+  test("should delete a user if user exists (deleteUser)", async () => {
     const mockValue = {
       fullName: "whatever",
       comapnyName: "ShowbixLLC",
       phoneNo: 235434,
       position: "manager",
+      save: jest.fn().mockResolvedValue({}),
     };
 
     const user = User.findByIdAndUpdate as jest.Mock;
     user.mockResolvedValue(mockValue);
-    const id = "223456789";
+    const id = new ObjectId();
     const deleteOperation = await userService.deleteUser(id);
 
     expect(deleteOperation).toEqual(mockValue);
+    expect(mockValue.save).toHaveBeenCalled();
     expect(ObjectId).toHaveBeenCalled();
   });
 
@@ -295,7 +302,9 @@ describe("UserService", () => {
       path: "/tmp/file.jpg",
     } as Express.Multer.File;
 
-    const result = await userService.uploadAvatar("id", mockFile);
+    const id = new ObjectId();
+
+    const result = await userService.uploadAvatar(id, mockFile);
 
     expect(upload).toHaveBeenCalled();
     expect(upload).toHaveBeenCalledWith(mockFile, "old-image");

@@ -13,6 +13,7 @@ import quoteRouter from "./routes/quote.ts";
 import productRouter from "./routes/product.ts";
 import orderRouter from "./routes/order.ts";
 import { setupSwagger, specs } from "./swagger.ts";
+import { connectRedis } from "./redis/client.ts";
 
 import "./db/mongoose.ts";
 
@@ -52,6 +53,7 @@ app.use(invalidRoute);
 app.use(errorMiddleware);
 
 const server = app.listen(port, () => {
+  connectRedis();
   logger.info(`Server listening on port ${port}!`);
 });
 

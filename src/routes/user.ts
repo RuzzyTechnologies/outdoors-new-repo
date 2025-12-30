@@ -2,6 +2,11 @@ import { Router } from "express";
 
 import { Auth } from "../middleware/auth";
 import { UserController } from "../controllers/user.controller";
+import { uploadMiddleware } from "../middleware/multer";
+
+const { multerConfig } = uploadMiddleware();
+
+const upload = multerConfig.single("avatar");
 
 const router = Router();
 const userController = new UserController();
@@ -19,10 +24,10 @@ router.get("/users/profile", auth, userController.getUser);
 
 router.patch("/users/updateInfo", auth, userController.updateUser);
 
-router.post("/users/avatar", auth, userController.uploadAvatar);
+router.post("/users/avatar", auth, upload, userController.uploadAvatar);
 
 router.patch("/users/updatePassword", auth, userController.updateUserPassword);
 
-router.patch("users/delete", auth, userController.softDeleteUser);
+router.patch("/users/delete", auth, userController.softDeleteUser);
 
 export default router;

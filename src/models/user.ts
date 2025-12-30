@@ -4,7 +4,8 @@ import { phone } from "phone";
 import jwt from "jsonwebtoken";
 import verifyPassword, { hashPassword } from "../utils/argon";
 import type { loginOptions } from "../types";
-import { NotFound } from "../utils/error";
+import { NotFound, Unauthorized } from "../utils/error";
+import { recordSuccess, recordFailure, isAccountLocked } from "../redis/lockup";
 
 import {
   ERR_COMPANY_REQUIRED,
@@ -36,11 +37,11 @@ const userSchema = new Schema(
       },
     },
     phoneNo: {
-      type: Number,
+      type: String,
       required: [true, ERR_PHONE_REQUIRED],
       trim: true,
       validator(value: string) {
-        return isValid(value);
+        return isValid(value, { country: "NG" });
       },
     },
     password: {
@@ -52,7 +53,7 @@ const userSchema = new Schema(
       trim: true,
       required: [true, ERR_COMPANY_REQUIRED],
     },
-    positionAtTheCompany: {
+    position: {
       type: String,
       trim: true,
     },
@@ -91,22 +92,26 @@ userSchema.methods.toJSON = function () {
 
   delete userObject.password;
   delete userObject.tokens;
-  delete userObject.avatar;
+  delete userObject.softDeleted;
 
   return userObject;
 };
 
 userSchema.methods.generateAuthToken = async function () {
-  const token = jwt.sign(
-    { _id: this._id.toString(), email: this.email },
-    process.env.JWT_SECRET as string,
-    {
-      expiresIn: process.env.JWT_EXPIRES_IN as any,
-    }
-  );
-  this.tokens = this.tokens.concat({ token });
-  await this.save();
-  return token;
+  try {
+    const token = jwt.sign(
+      { _id: this._id.toString(), email: this.email },
+      process.env.JWT_SECRET as string,
+      {
+        expiresIn: process.env.JWT_EXPIRES_IN as any,
+      }
+    );
+    this.tokens = this.tokens.concat({ token });
+    await this.save();
+    return token;
+  } catch (e) {
+    throw e;
+  }
 };
 
 userSchema.statics.findByCredentials = async (payload: loginOptions) => {
@@ -116,9 +121,15 @@ userSchema.statics.findByCredentials = async (payload: loginOptions) => {
 
     if (!user) throw new NotFound("Wrong email/password combination");
 
-    const isMatch = await verifyPassword(user.password, password);
-    if (!isMatch) throw new NotFound("Wrong email/password combination");
+    if (await isAccountLocked(email))
+      throw new Unauthorized("Account locked. Try again in 10 minutes");
 
+    const isMatch = await verifyPassword(user.password, password);
+    if (!isMatch) {
+      await recordFailure(email);
+      throw new NotFound("Wrong email/password combination");
+    }
+    await recordSuccess(email);
     return user;
   } catch (e) {
     throw e;

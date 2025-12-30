@@ -1,5 +1,10 @@
 import { User } from "../models/user";
-import { Conflict, InternalServerError, NotFound } from "../utils/error";
+import {
+  Conflict,
+  InternalServerError,
+  NotFound,
+  Unauthorized,
+} from "../utils/error";
 import type { loginOptions, userOptions, userUpdateFields } from "../types";
 import { UserService as US } from "../types";
 import { logger } from "../utils/logger";
@@ -28,16 +33,18 @@ export class UserService implements US {
       const user = new this.userRepository({
         fullName,
         phoneNo,
+        email,
         password,
         companyName,
         position,
       });
       await user.save();
-      logger.info("Admin created...");
+      logger.info("User created...");
       return user;
     } catch (e: any) {
       if (e instanceof Conflict) throw e;
       logger.error("Error creating user");
+      console.log(e);
       throw new InternalServerError(`Error creating user`);
     }
   }
@@ -61,6 +68,7 @@ export class UserService implements US {
       return { user, token };
     } catch (e: any) {
       if (e instanceof NotFound) throw e;
+      if (e instanceof Unauthorized) throw e;
       logger.error("Error logging user in...", e);
       throw new InternalServerError(`Error logging user in.`);
     }
@@ -68,11 +76,14 @@ export class UserService implements US {
 
   async logout(req: any) {
     try {
-      req.user.tokens = req.user.tokens.filter(
+      const user = await this.userRepository.findOne({ _id: req.user._id });
+      if (!user) throw new NotFound("User not found");
+
+      user.tokens = user.tokens.filter(
         (token: any) => token.token !== req.token
       );
 
-      await req.user.save();
+      await user.save();
       logger.info("User successfully logged out...");
     } catch (e: any) {
       logger.error("Error logging user out...");
@@ -82,9 +93,13 @@ export class UserService implements US {
 
   async logoutFromAllDevices(req: any) {
     try {
-      req.user.tokens = [];
+      const user = await this.userRepository.findOne({
+        _id: req.user._id,
+      });
+      if (!user) throw new NotFound("User not found");
 
-      await req.user.save();
+      user.tokens = [];
+      await user.save();
       logger.info("User successfully logged out...");
     } catch (e: any) {
       logger.error("Error logging user out...");
@@ -92,13 +107,16 @@ export class UserService implements US {
     }
   }
 
-  async updateUserInfo(id: string, payload: userUpdateFields) {
+  async updateUserInfo(id: ObjectId, payload: userUpdateFields) {
     try {
-      const _id = new ObjectId(String(id));
-      const user = await this.userRepository.findOneAndUpdate(_id, payload, {
-        new: true,
-        runValidators: true,
-      });
+      const user = await this.userRepository.findOneAndUpdate(
+        { _id: id },
+        payload,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
       if (!user) throw new NotFound(`User doesn't exist`);
 
       logger.info("User info updated...");
@@ -111,11 +129,10 @@ export class UserService implements US {
     }
   }
 
-  async updatePassword(id: string, password: string) {
+  async updatePassword(id: ObjectId, password: string) {
     try {
-      const _id = new ObjectId(String(id));
       const user = await this.userRepository.findOneAndUpdate(
-        _id,
+        { _id: id },
         { password },
         {
           new: true,
@@ -134,15 +151,16 @@ export class UserService implements US {
     }
   }
 
-  async deleteUser(id: string) {
+  async deleteUser(id: ObjectId) {
     try {
-      const _id = new ObjectId(id);
       const user = await this.userRepository.findByIdAndUpdate(
-        _id,
+        { _id: id },
         { softDeleted: true },
         { runValidators: true, new: true }
       );
       if (!user) throw new NotFound(`User doesn't exist`);
+      user.tokens = [];
+      user.save();
 
       logger.info("User successfully deleted");
       return user;
@@ -153,7 +171,7 @@ export class UserService implements US {
     }
   }
 
-  async uploadAvatar(id: string, file: Express.Multer.File) {
+  async uploadAvatar(id: ObjectId, file: Express.Multer.File) {
     try {
       const user = await this.getSpecificUser(id);
 
@@ -196,10 +214,9 @@ export class UserService implements US {
     }
   }
 
-  async getSpecificUser(id: string) {
+  async getSpecificUser(id: ObjectId) {
     try {
-      const _id = new ObjectId(id);
-      const user = await this.userRepository.findOne({ _id });
+      const user = await this.userRepository.findOne({ _id: id });
       if (!user) throw new NotFound("User does not exist");
       return user;
     } catch (e) {

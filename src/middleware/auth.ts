@@ -1,6 +1,6 @@
 import { NextFunction, Response } from "express";
 import { AuthenticatedRequest, AuthRequest } from "../types";
-import { NotFound, Unauthorized } from "../utils/error";
+import { Unauthorized } from "../utils/error";
 import jwt from "jsonwebtoken";
 import { Admin } from "../models/admin";
 import { User } from "../models/user";
@@ -41,7 +41,9 @@ export class Auth {
         req.token = token;
       }
       next();
-    } catch (e) {
+    } catch (e: any) {
+      if (e.name === "TokenExpiredError")
+        throw new Unauthorized("Please authenticate");
       next(e);
     }
   };
@@ -55,7 +57,7 @@ export class Auth {
       const admin = await this.adminRepository.findOne({
         _id,
         username,
-        "tokens.token": token
+        "tokens.token": token,
       });
 
       if (!admin) throw new Unauthorized("Please authenticate!");
@@ -63,11 +65,11 @@ export class Auth {
     }
 
     const { _id, email } = decoded;
-    if (!_id || email) throw new Unauthorized("Please authenticate!");
+    if (!_id || !email) throw new Unauthorized("Please authenticate!");
     const user = await this.userRepository.findOne({
       _id,
       email,
-      "tokens.token": token
+      "tokens.token": token,
     });
 
     if (!user) throw new Unauthorized("Please authenticate!");

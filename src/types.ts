@@ -96,7 +96,7 @@ export type adminUpdateFields = {
 export type userOptions = {
   fullName: string;
   email: string;
-  phoneNo: number;
+  phoneNo: string;
   password: string;
   companyName: string;
   position: string;
@@ -113,8 +113,8 @@ type avatarUser = {
 };
 
 export type userUpdateFields = {
-  fullname?: string;
-  phoneNo?: number;
+  fullName?: string;
+  phoneNo?: string;
   companyName?: string;
   position?: string;
 };
@@ -125,13 +125,16 @@ export interface UserService {
   logout: (payload: any) => Promise<void>;
   logoutFromAllDevices: (payload: any) => Promise<void>;
   updateUserInfo: (
-    id: string,
+    id: ObjectId,
     paylaod: userUpdateFields
   ) => Promise<UserDocument>;
-  updatePassword: (id: string, password: string) => Promise<UserDocument>;
-  deleteUser: (id: string) => Promise<UserDocument>;
-  getSpecificUser: (id: string) => Promise<UserDocument>;
-  uploadAvatar: (id: string, file: Express.Multer.File) => Promise<avatarUser>;
+  updatePassword: (id: ObjectId, password: string) => Promise<UserDocument>;
+  deleteUser: (id: ObjectId) => Promise<UserDocument>;
+  getSpecificUser: (id: ObjectId) => Promise<UserDocument>;
+  uploadAvatar: (
+    id: ObjectId,
+    file: Express.Multer.File
+  ) => Promise<avatarUser>;
   createOTP: () => Promise<string>;
   verifyOTP: () => Promise<boolean>;
 }
@@ -179,7 +182,7 @@ export interface AuthRequest extends Request {
 export interface UserDocument extends Document {
   fullName: string;
   email: string;
-  phoneNo: number;
+  phoneNo: string;
   companyName: string;
   position: string;
   password: string;
@@ -470,7 +473,7 @@ export interface OrderDocument extends Document {
 export interface OrderModel extends Model<OrderDocument> {}
 
 export type orderPayload = {
-  userId: string;
+  userId: ObjectId;
   productId: string;
   dateRequested: string;
   status: string;
