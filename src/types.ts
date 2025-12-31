@@ -258,7 +258,7 @@ export interface ProductModel extends Model<ProductDocument> {}
 
 export interface ProductService {
   createProduct(
-    id: string,
+    id: ObjectId,
     payload: productPayload,
     location: locationPayload,
     img?: image

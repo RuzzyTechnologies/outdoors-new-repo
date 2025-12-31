@@ -47,7 +47,7 @@ describe("ProductService", () => {
 
     (LocationService.prototype.getArea as jest.Mock) = mockSave;
 
-    const id = "ajscsfgrfbhb";
+    const id = new ObjectId();
 
     const productPayload = {
       title: "sumn",

@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import { ProductController as PC, AuthenticatedRequest } from "../types";
 import { ProductService } from "../services/product.service";
 import { BadRequest } from "../utils/error";
+import { ObjectId } from "mongodb";
 
 export class ProductController implements PC {
   private productService: ProductService;
@@ -54,12 +55,17 @@ export class ProductController implements PC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async addProduct(
+  addProduct = async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     try {
+      if (!req.body)
+        throw new BadRequest(
+          "Bad Request. Fields (title, category, availability, description, size, address, area, state) cannot be empty"
+        );
+
       const {
         title,
         category,
@@ -89,7 +95,7 @@ export class ProductController implements PC {
 
       if (req.admin) {
         const product = await this.productService.createProduct(
-          req.admin._id as string,
+          req.admin._id as ObjectId,
           {
             title,
             category,
@@ -112,7 +118,7 @@ export class ProductController implements PC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -158,7 +164,7 @@ export class ProductController implements PC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async uploadImage(req: Request, res: Response, next: NextFunction) {
+  uploadImage = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { productId } = req.params;
 
@@ -180,7 +186,7 @@ export class ProductController implements PC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -226,7 +232,11 @@ export class ProductController implements PC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async getSpecificProduct(req: Request, res: Response, next: NextFunction) {
+  getSpecificProduct = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const { productId } = req.params;
       const product = await this.productService.getSpecificProduct(
@@ -243,7 +253,7 @@ export class ProductController implements PC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -291,7 +301,7 @@ export class ProductController implements PC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async getAllProducts(req: Request, res: Response, next: NextFunction) {
+  getAllProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page, limit } = req.query;
       const getProducts = await this.productService.getAllProducts(
@@ -311,7 +321,7 @@ export class ProductController implements PC {
     } catch (e) {
       next(e);
     }
-  }
+  };
   /**
    * @openapi
    * /api/v1/products/{productId}:
@@ -362,16 +372,57 @@ export class ProductController implements PC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async updateProduct(req: Request, res: Response, next: NextFunction) {
+  updateProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (Object.keys(req.body).length === 0)
+      if (!req.body || Object.keys(req.body).length === 0)
         throw new BadRequest(
           "Bad Request. One of fields( title, category, availability, description, quantity, featured, size, address) cannot be empty"
         );
+
+      const updates = Object.keys(req.body);
+      const validOptions = [
+        "title",
+        "category",
+        "availability",
+        "description",
+        "quantity",
+        "featured",
+        "size",
+        "address",
+      ];
+      const validUpdates = updates.every((update) =>
+        validOptions.includes(update)
+      );
+
+      if (!validUpdates)
+        throw new BadRequest(
+          "Bad Request. One of fields( title, category, availability, description, quantity, featured, size, address) cannot be empty"
+        );
+
+      const {
+        title,
+        category,
+        availability,
+        description,
+        quantity,
+        featured,
+        size,
+        address,
+      } = req.body;
+
       const { productId } = req.params;
       const product = await this.productService.updateProduct(
         productId as string,
-        req.body
+        {
+          title,
+          category,
+          availability,
+          description,
+          quantity,
+          featured,
+          size,
+          address,
+        }
       );
 
       res.status(200).json({
@@ -384,11 +435,11 @@ export class ProductController implements PC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
-   * /api/v1/products/by-area:
+   * /api/v1/products/fetch/by-area:
    *   get:
    *     summary: Get products in a specific area and state
    *     description: Fetch paginated products filtered by state and area
@@ -444,10 +495,14 @@ export class ProductController implements PC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async getProductsByArea(req: Request, res: Response, next: NextFunction) {
+  getProductsByArea = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const { page, limit } = req.query;
-      const { state, area } = req.query;
+      const { page, limit, state, area } = req.query;
+
       if (!state || !area)
         throw new BadRequest(
           "Bad Request. Field (state and area) cannot be empty."
@@ -472,11 +527,11 @@ export class ProductController implements PC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
-   * /api/v1/products/by-state:
+   * /api/v1/products/fetch/by-state:
    *   get:
    *     summary: Get products in a specific state
    *     description: Fetch paginated products filtered by state
@@ -526,7 +581,11 @@ export class ProductController implements PC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async getProductsByState(req: Request, res: Response, next: NextFunction) {
+  getProductsByState = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const { page, limit } = req.query;
       const { state } = req.query;
@@ -551,7 +610,7 @@ export class ProductController implements PC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -597,7 +656,7 @@ export class ProductController implements PC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async deleteProduct(req: Request, res: Response, next: NextFunction) {
+  deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { productId } = req.params;
       await this.productService.deleteProduct(productId as string);
@@ -609,5 +668,5 @@ export class ProductController implements PC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 }

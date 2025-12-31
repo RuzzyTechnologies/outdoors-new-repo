@@ -1,15 +1,12 @@
 import { Product } from "../models/products";
-import { NotFound, InternalServerError } from "../utils/error";
+import { NotFound, InternalServerError, BadRequest } from "../utils/error";
 import { logger } from "../utils/logger";
 import { ObjectId } from "mongodb";
 import { productPayload, ProductService as PS } from "../types";
-import type {
-  locationPayload,
-  ProductDocument,
-  updateProductPayload,
-} from "../types";
+import type { locationPayload, updateProductPayload } from "../types";
 import { uploadMiddleware } from "../middleware/multer";
 import { LocationService } from "./location.service";
+import { Types } from "mongoose";
 
 export class ProductService implements PS {
   private productRepository;
@@ -21,7 +18,7 @@ export class ProductService implements PS {
   }
 
   async createProduct(
-    id: string,
+    id: ObjectId,
     payload: productPayload,
     locationDetails: locationPayload
   ) {
@@ -30,19 +27,19 @@ export class ProductService implements PS {
 
       const area = await this.locationService.getArea(stateArea, stateName);
 
-      const _id = new ObjectId(id);
-
       const product = new this.productRepository({
         ...payload,
-        createdBy: _id,
+        createdBy: id,
         state: area.location,
         area: area._id,
       });
       await product.save();
+
       logger.info("Product created...");
       return product;
     } catch (e: any) {
       logger.error(`Error creating product.`);
+      if (e instanceof NotFound) throw e;
       throw new InternalServerError(`Error creating product.`);
     }
   }
@@ -63,11 +60,15 @@ export class ProductService implements PS {
         publicId
       );
 
-      product.image.url = url;
-      product.image.name = fileName;
-      product.image.size = size;
-      product.image.mimetype = mimetype;
-      await product.save();
+      await product.updateOne(
+        {
+          "image.url": url,
+          "image.fileName": fileName,
+          "image.size": size,
+          "image.mimetype": mimetype,
+        },
+        { new: true, runValidators: true }
+      );
 
       return { product, url };
     } catch (e) {
@@ -100,22 +101,27 @@ export class ProductService implements PS {
 
   async getSpecificProduct(id: string) {
     try {
-      const _id = new ObjectId(id);
-      const product = (await this.productRepository.findOne({
-        _id,
-      })) as ProductDocument;
+      if (!Types.ObjectId.isValid(id))
+        throw new BadRequest("Invalid Product ID");
+
+      const product = await this.productRepository.findOne({
+        _id: id,
+      });
       if (!product) throw new NotFound(`Product not found`);
 
       return product;
     } catch (e: any) {
       logger.error("Product fetch unsuccessful!");
-      if (e instanceof NotFound) throw e;
+      if (e instanceof NotFound || e instanceof BadRequest) throw e;
       throw new InternalServerError(`Product fetch unsuccessful!`);
     }
   }
 
   async getAllProducts(page: number = 1, limit: number = 10) {
     try {
+      page = page || 1;
+      limit = limit || 10;
+
       const skip = (page - 1) * limit;
       const total = await this.productRepository.countDocuments();
 
@@ -136,9 +142,8 @@ export class ProductService implements PS {
 
   async updateProduct(id: string, payload: updateProductPayload) {
     try {
-      const _id = new ObjectId(String(id));
       const product = await this.productRepository.findOneAndUpdate(
-        _id,
+        { _id: id },
         payload,
         {
           new: true,
@@ -158,8 +163,9 @@ export class ProductService implements PS {
 
   async deleteProduct(id: string) {
     try {
-      const _id = new ObjectId(String(id));
-      const product = await this.productRepository.findByIdAndDelete(_id);
+      const product = await this.productRepository.findByIdAndDelete({
+        _id: id,
+      });
       if (!product) throw new NotFound(`Product doesn't exist`);
 
       logger.info("Product deleted successfully!");
@@ -177,6 +183,9 @@ export class ProductService implements PS {
     limit: number = 10
   ) {
     try {
+      page = page || 1;
+      limit = limit || 10;
+
       const skip = (page - 1) * limit;
 
       const location = await this.locationService.getState(state);
@@ -207,6 +216,9 @@ export class ProductService implements PS {
     limit: number = 10
   ) {
     try {
+      page = page || 1;
+      limit = limit || 10;
+
       const area = await this.locationService.getArea(areaName, stateName);
 
       const skip = (page - 1) * limit;
