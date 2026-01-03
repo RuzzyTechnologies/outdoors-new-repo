@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { ObjectId } from "mongodb";
 
 import { UserController as UC, AuthRequest } from "../types";
 import { UserService } from "../services/user.service";
@@ -47,14 +48,19 @@ export class UserController implements UC {
    *               $ref: "#/components/schemas/ErrorResponse"
    *
    */
-  async signup(req: Request, res: Response, next: NextFunction) {
+  signup = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.body)
+        throw new BadRequest(
+          "Bad Request. Fields ( fullName, email, phoneNo, password, companyName) cannot be empty"
+        );
+
       const { fullName, email, phoneNo, password, companyName, position } =
         req.body;
 
       if (!fullName || !email || !phoneNo || !password || !companyName)
         throw new BadRequest(
-          "Bad Request. Fields ( fullName, email, phoneNo, password, companyName, position) cannot be empty"
+          "Bad Request. Fields ( fullName, email, phoneNo, password, companyName) cannot be empty"
         );
 
       const user = await this.userService.createUser({
@@ -75,7 +81,7 @@ export class UserController implements UC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -107,11 +113,11 @@ export class UserController implements UC {
    *             schema:
    *               $ref: "#/components/schemas/ErrorResponse"
    */
-  async logoutFromAllDevices(
+  logoutFromAllDevices = async (
     req: AuthRequest,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     try {
       await this.userService.logoutFromAllDevices(req);
       res.status(200).json({
@@ -121,7 +127,7 @@ export class UserController implements UC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -163,8 +169,13 @@ export class UserController implements UC {
    *             schema:
    *               $ref: "#/components/schemas/ErrorResponse"
    */
-  async login(req: Request, res: Response, next: NextFunction) {
+  login = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.body)
+        throw new BadRequest(
+          "Bad Request. Fields (email and password) cannot be empty"
+        );
+
       const { email, password } = req.body;
 
       if (!email || !password)
@@ -188,7 +199,7 @@ export class UserController implements UC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -220,7 +231,7 @@ export class UserController implements UC {
    *             schema:
    *               $ref: "#/components/schemas/ErrorResponse"
    */
-  async logout(req: AuthRequest, res: Response, next: NextFunction) {
+  logout = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       await this.userService.logout(req);
       res.status(200).json({
@@ -230,7 +241,7 @@ export class UserController implements UC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -320,19 +331,31 @@ export class UserController implements UC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async updateUser(req: AuthRequest, res: Response, next: NextFunction) {
+  updateUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      if (Object.keys(req.body).length === 0)
+      if (!req.body || Object.keys(req.body).length === 0)
         throw new BadRequest(
-          "Bad Request. One of fields (fullname, phoneNo, companyName and position) cannot be empty"
+          "Bad Request. One of fields (fullName, phoneNo, companyName and position) cannot be empty"
         );
-      const { fullname, phoneNo, companyName, position } = req.body;
+
+      const updates = Object.keys(req.body);
+      const validOptions = ["fullName", "phoneNo", "companyName", "position"];
+      const validUpdates = updates.every((update) =>
+        validOptions.includes(update)
+      );
+
+      if (!validUpdates)
+        throw new BadRequest(
+          "Bad Request. Only fields (fullName, phoneNo, companyName and position)) are allowed"
+        );
+
+      const { fullName, phoneNo, companyName, position } = req.body;
 
       if (req.user) {
         const user = await this.userService.updateUserInfo(
-          req.user._id as string,
+          req.user._id as ObjectId,
           {
-            fullname,
+            fullName,
             phoneNo,
             companyName,
             position,
@@ -349,7 +372,7 @@ export class UserController implements UC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -394,19 +417,32 @@ export class UserController implements UC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async updateUserPassword(
+  updateUserPassword = async (
     req: AuthRequest,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     try {
+      if (!req.body || Object.keys(req.body).length === 0)
+        throw new BadRequest("Bad Request. Field (password) cannot be empty");
+      const updates = Object.keys(req.body);
+      const validOptions = ["password"];
+      const validUpdates = updates.every((update) =>
+        validOptions.includes(update)
+      );
+
+      if (!validUpdates)
+        throw new BadRequest("Bad Request. Only field (password) is allowed");
+
       const { password } = req.body;
-      if (password)
-        throw new BadRequest(
-          "Bad Request. One of fields (username, firstName, and lastName) cannot be empty"
-        );
+      if (!password)
+        throw new BadRequest("Bad Request. Field (password) cannot be empty");
+
       if (req.user) {
-        await this.userService.updatePassword(req.user._id as string, password);
+        await this.userService.updatePassword(
+          req.user._id as ObjectId,
+          password
+        );
         res.status(200).json({
           status: 200,
           message: "User password successfully updated!",
@@ -415,7 +451,7 @@ export class UserController implements UC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -447,10 +483,14 @@ export class UserController implements UC {
    *             schema:
    *               $ref: "#/components/schemas/ErrorResponse"
    */
-  async softDeleteUser(req: AuthRequest, res: Response, next: NextFunction) {
+  softDeleteUser = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       if (req.user) {
-        await this.userService.deleteUser(req.user.id as string);
+        await this.userService.deleteUser(req.user.id as ObjectId);
         res.status(200).json({
           status: 200,
           message: "User deleted successfully",
@@ -459,7 +499,7 @@ export class UserController implements UC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -504,13 +544,17 @@ export class UserController implements UC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async uploadAvatar(req: AuthRequest, res: Response, next: NextFunction) {
+  uploadAvatar = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       if (!req.file) throw new BadRequest("Bad Request. File not found");
 
       if (req.user) {
         const { user, newUrl } = await this.userService.uploadAvatar(
-          req.user._id as string,
+          req.user._id as ObjectId,
           req.file as Express.Multer.File
         );
 
@@ -526,5 +570,5 @@ export class UserController implements UC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 }

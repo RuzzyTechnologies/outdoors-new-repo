@@ -7,9 +7,9 @@ const router = Router();
 const locationController = new LocationController();
 const { auth } = new Auth();
 
-router.post("/locations/state", auth, locationController.createArea);
+router.post("/locations/state", auth, locationController.createState);
 
-router.post("/locations/area", auth, locationController.createState);
+router.post("/locations/area", auth, locationController.createArea);
 
 router.get(
   "/locations/areas",

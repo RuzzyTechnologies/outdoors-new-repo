@@ -97,6 +97,9 @@ export class LocationService implements LS {
 
   async getAllStates(pages: number = 1, limit: number = 10) {
     try {
+      pages = pages || 1;
+      limit = limit || 10;
+
       const skip = (pages - 1) * limit;
       const total = await this.locationRepository.countDocuments();
 
@@ -121,6 +124,9 @@ export class LocationService implements LS {
     limit: number = 10
   ) {
     try {
+      pages = pages || 1;
+      limit = limit || 10;
+
       const skip = (pages - 1) * limit;
 
       const state = await this.getState(stateName);

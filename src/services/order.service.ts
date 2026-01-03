@@ -21,7 +21,7 @@ export class OrderService implements OS {
     this.productService = new ProductService();
   }
 
-  async createOrder(order: orderPayload) {
+  createOrder = async (order: orderPayload) => {
     try {
       const { userId, productId, dateRequested, status } = order;
 
@@ -42,14 +42,14 @@ export class OrderService implements OS {
       return newOrder;
     } catch (e: any) {
       logger.error("Error creating order");
+      if (e instanceof NotFound) throw e;
       throw new InternalServerError("Error creating order");
     }
-  }
+  };
 
-  async findSpecificOrder(orderId: string) {
+  findSpecificOrder = async (orderId: string) => {
     try {
-      const _id = new ObjectId(orderId);
-      const order = await this.orderRepository.findOne({ _id });
+      const order = await this.orderRepository.findOne({ _id: orderId });
 
       if (!order) throw new NotFound("Order doesn't exist");
 
@@ -59,10 +59,13 @@ export class OrderService implements OS {
       if (e instanceof NotFound) throw e;
       throw new InternalServerError("Error finding order");
     }
-  }
+  };
 
-  async getAllOrders(page: number = 1, limit: number = 10) {
+  getAllOrders = async (page: number = 1, limit: number = 10) => {
     try {
+      page = page || 1;
+      limit = limit || 10;
+
       const skip = (page - 1) * limit;
       const total = await this.orderRepository.countDocuments();
       const orders = await this.orderRepository
@@ -78,10 +81,10 @@ export class OrderService implements OS {
       if (e instanceof NotFound) throw e;
       throw new InternalServerError("Error fetching orders");
     }
-  }
+  };
 
   /** QUOTE */
-  async createQuote(orderId: string, quotePayload: quotePayload) {
+  createQuote = async (orderId: string, quotePayload: quotePayload) => {
     try {
       const order = await this.findSpecificOrder(orderId);
       const { availableFrom, availableTo, price, title, description } =
@@ -100,16 +103,15 @@ export class OrderService implements OS {
       await quote.save();
       return quote;
     } catch (e: any) {
-      logger.error("Error creating error");
+      logger.error("Error creating quote");
       if (e instanceof NotFound) throw e;
-      throw new InternalServerError("Error creating user");
+      throw new InternalServerError("Error creating quote");
     }
-  }
+  };
 
-  async findSpecificQuote(quoteId: string) {
+  findSpecificQuote = async (quoteId: string) => {
     try {
-      const _id = new ObjectId(quoteId);
-      const quote = await this.quoteRepository.findOne({ _id });
+      const quote = await this.quoteRepository.findOne({ _id: quoteId });
 
       if (!quote) throw new NotFound("Quote doesn't exist");
 
@@ -119,27 +121,26 @@ export class OrderService implements OS {
       if (e instanceof NotFound) throw e;
       throw new InternalServerError("Error finding quote");
     }
-  }
+  };
 
-  async updateQuote(quoteId: string, quotePayload: updateQuotePayload) {
+  updateQuote = async (quoteId: string, quotePayload: updateQuotePayload) => {
     try {
-      const _id = new ObjectId(quoteId);
       const quote = await this.quoteRepository.findByIdAndUpdate(
-        _id,
+        { _id: quoteId },
         quotePayload,
         {
           new: true,
           runValidators: true,
         }
       );
-      if (!quote) throw new NotFound("Quote doesnt exist");
+      if (!quote) throw new NotFound("Quote doesn't exist");
       return quote;
     } catch (e: any) {
       logger.error("Error updating quote");
       if (e instanceof NotFound) throw e;
       throw new InternalServerError("Error updating quote");
     }
-  }
+  };
 
   private createInvoiceString() {
     try {

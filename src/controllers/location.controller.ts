@@ -47,13 +47,17 @@ export class LocationController implements LC {
    *             schema:
    *               $ref: "#/components/schemas/ErrorResponse"
    */
-  async createState(req: Request, res: Response, next: NextFunction) {
+  createState = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.body || Object.keys(req.body).length === 0)
+        throw new BadRequest("Bad Request. Field (state) cannot be empty");
+
       const { state } = req.body;
       if (!state)
         throw new BadRequest("Bad Request. Field (state) cannot be empty");
 
       const location = await this.locationService.createState(state);
+
       res.status(201).json({
         status: 201,
         message: "State created successfully",
@@ -64,7 +68,7 @@ export class LocationController implements LC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -103,8 +107,13 @@ export class LocationController implements LC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async createArea(req: Request, res: Response, next: NextFunction) {
+  createArea = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.body || Object.keys(req.body).length === 0)
+        throw new BadRequest(
+          "Bad Request. Field (area and state) cannot be empty"
+        );
+
       const { area, state } = req.body;
       if (!area || !state)
         throw new BadRequest(
@@ -125,7 +134,7 @@ export class LocationController implements LC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -182,7 +191,7 @@ export class LocationController implements LC {
    *             schema:
    *               $ref: "#/components/schemas/ErrorResponse"
    */
-  async getArea(req: Request, res: Response, next: NextFunction) {
+  getArea = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { area, state } = req.query;
 
@@ -200,7 +209,7 @@ export class LocationController implements LC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -251,7 +260,7 @@ export class LocationController implements LC {
    *             schema:
    *               $ref: "#/components/schemas/ErrorResponse"
    */
-  async getState(req: Request, res: Response, next: NextFunction) {
+  getState = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { state } = req.query;
 
@@ -266,7 +275,7 @@ export class LocationController implements LC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -314,7 +323,7 @@ export class LocationController implements LC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async getAllStates(req: Request, res: Response, next: NextFunction) {
+  getAllStates = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page, limit } = req.query;
       const getStates = await this.locationService.getAllStates(
@@ -334,7 +343,7 @@ export class LocationController implements LC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -388,14 +397,13 @@ export class LocationController implements LC {
    *               $ref: "#/components/schemas/ErrorResponse"
    */
 
-  async getAllAreasInASpecificState(
+  getAllAreasInASpecificState = async (
     req: Request,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     try {
-      const { page, limit } = req.query;
-      const { state } = req.query;
+      const { page, limit, state } = req.query;
 
       if (!state)
         throw new BadRequest("Bad Request. Field (state) cannot be empty");
@@ -408,7 +416,7 @@ export class LocationController implements LC {
         );
 
       res.status(200).json({
-        status: 2200,
+        status: 200,
         message: `Areas in ${state} fetched successfully!`,
         data: {
           currentPage: getAllAreasInASpecificState.pages,
@@ -419,5 +427,5 @@ export class LocationController implements LC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 }

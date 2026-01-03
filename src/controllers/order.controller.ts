@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import { OrderController as OC, AuthRequest } from "../types";
 import { OrderService } from "../services/order.service";
 import { BadRequest } from "../utils/error";
+import { ObjectId } from "mongodb";
 
 export class OrderController implements OC {
   private orderService: OrderService;
@@ -53,13 +54,24 @@ export class OrderController implements OC {
    *         description: Internal server error
    */
 
-  async createOrder(req: AuthRequest, res: Response, next: NextFunction) {
+  createOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       let { productId } = req.params;
+
+      if (!req.body || Object.keys(req.body).length === 0)
+        throw new BadRequest(
+          "Bad Request. Fields (dateRequested, status) cannot be empty"
+        );
+
       let { dateRequested, status } = req.body;
 
+      if (!dateRequested || !status)
+        throw new BadRequest(
+          "Bad Request. Fields (dateRequested, status) cannot be empty"
+        );
+
       if (req.user) {
-        const userId = req.user._id as string;
+        const userId = req.user._id as ObjectId;
 
         const order = await this.orderService.createOrder({
           userId,
@@ -79,7 +91,7 @@ export class OrderController implements OC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -111,7 +123,11 @@ export class OrderController implements OC {
    *         description: Internal server error
    */
 
-  async findSpecificOrder(req: Request, res: Response, next: NextFunction) {
+  findSpecificOrder = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const { orderId } = req.params;
 
@@ -129,7 +145,7 @@ export class OrderController implements OC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -167,7 +183,7 @@ export class OrderController implements OC {
    *         description: Internal server error
    */
 
-  async getAllOrders(req: Request, res: Response, next: NextFunction) {
+  getAllOrders = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { page, limit } = req.query;
 
@@ -188,7 +204,7 @@ export class OrderController implements OC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -226,8 +242,13 @@ export class OrderController implements OC {
    *         description: Internal server error
    */
 
-  async createQuote(req: Request, res: Response, next: NextFunction) {
+  createQuote = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.body)
+        throw new BadRequest(
+          "Bad Request. Fields (availableFrom, availableTo, price and title) cannot be empty"
+        );
+
       const { orderId } = req.params;
       const { availableFrom, availableTo, price, title, description } =
         req.body;
@@ -253,7 +274,7 @@ export class OrderController implements OC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -290,14 +311,33 @@ export class OrderController implements OC {
    *         description: Internal server error
    */
 
-  async updateQuote(req: Request, res: Response, next: NextFunction) {
+  updateQuote = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { quoteId } = req.params;
+      const updates = Object.keys(req.body);
 
-      if (Object.keys(req.body).length === 0)
+      if (updates.length === 0)
         throw new BadRequest(
-          "Bad Request. One of fields (title, price,,availableFrom, availableTo, description cannot be empty"
+          "Bad Request. One of fields (title, price, availableFrom, availableTo, description) cannot be empty"
         );
+
+      const validOptions = [
+        "title",
+        "price",
+        "availableFrom",
+        "availableTo",
+        "description",
+      ];
+
+      const validUpdates = updates.every((update) =>
+        validOptions.includes(update)
+      );
+
+      if (!validUpdates)
+        throw new BadRequest(
+          "Bad Request. Only fields (title, price, availableFrom, availableTo, description) are allowed"
+        );
+
       const { availableFrom, availableTo, price, title, description } =
         req.body;
 
@@ -317,7 +357,7 @@ export class OrderController implements OC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 
   /**
    * @openapi
@@ -348,7 +388,11 @@ export class OrderController implements OC {
    *         description: Internal server error
    */
 
-  async findSpecificQuote(req: Request, res: Response, next: NextFunction) {
+  findSpecificQuote = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const { quoteId } = req.params;
 
@@ -366,5 +410,5 @@ export class OrderController implements OC {
     } catch (e) {
       next(e);
     }
-  }
+  };
 }

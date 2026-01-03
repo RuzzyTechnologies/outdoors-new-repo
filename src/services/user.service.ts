@@ -44,7 +44,6 @@ export class UserService implements US {
     } catch (e: any) {
       if (e instanceof Conflict) throw e;
       logger.error("Error creating user");
-      console.log(e);
       throw new InternalServerError(`Error creating user`);
     }
   }
