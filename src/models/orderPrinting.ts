@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-import { documentSchema } from "./manageBillboard.js";
+import { documentSchema } from "./manageBillboard";
 
 const printingSchema = new Schema(
   {

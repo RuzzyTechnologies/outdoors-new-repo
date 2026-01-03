@@ -4,7 +4,6 @@ import type {
   adminOptions,
   loginOptions,
   adminUpdateFields,
-  AdminDocument,
 } from "../types";
 import { AdminService as AS } from "../types";
 import { logger } from "../utils/logger";
