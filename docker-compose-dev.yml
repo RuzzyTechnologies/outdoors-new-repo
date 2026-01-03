@@ -47,7 +47,7 @@ services:
     environment:
       - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
     volumes:
-      - mongo-data:/data/db
+      - mongo-data:/data/
   redis:
     image: redis:8.4.0
     environment:

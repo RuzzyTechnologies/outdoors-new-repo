@@ -30,7 +30,7 @@ const swaggerDefinition: SwaggerDefinition = {
 
 const options = {
   definition: swaggerDefinition,
-  apis: ["./src/openapi/*.ts", "./src/routes/*.ts"],
+  apis: ["./src/openapi/*.ts", "./src/controllers/*.ts"],
 };
 
 export const specs = swaggerJSDoc(options);
@@ -49,7 +49,7 @@ export function setupSwagger(app: Express, specs: object) {
   });
 
   app.use(
-    "/docs",
+    "/api/v1/docs",
     swaggerAuth,
     swaggerUi.serve,
     swaggerUi.setup(specs, {
