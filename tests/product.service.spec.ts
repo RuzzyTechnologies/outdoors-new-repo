@@ -1,8 +1,9 @@
 import { Product } from "../src/models/products";
 import { ProductService } from "../src/services/product.service";
-import { NotFound } from "../src/utils/error";
+import { BadRequest, NotFound } from "../src/utils/error";
 import { ObjectId } from "mongodb";
 import { LocationService } from "../src/services/location.service";
+import { Types } from "mongoose";
 
 jest.mock("../src/utils/logger", () => ({
   logger: {
@@ -10,6 +11,21 @@ jest.mock("../src/utils/logger", () => ({
     error: jest.fn(),
   },
 }));
+
+jest.mock("mongoose", () => {
+  const actualMongoose = jest.requireActual("mongoose");
+
+  return {
+    ...actualMongoose,
+    Types: {
+      ...actualMongoose.Types,
+      ObjectId: {
+        ...actualMongoose.Types.ObjectId,
+        isValid: jest.fn(),
+      },
+    },
+  };
+});
 
 jest.mock("mongodb", () => ({
   ObjectId: jest.fn((id) => `mocked-id-${id}`),
@@ -84,6 +100,7 @@ describe("ProductService", () => {
 
   test("should upload new image successfully.", async () => {
     const mockSave = jest.fn().mockResolvedValue(true);
+    const update = jest.fn();
 
     productService.getSpecificProduct = jest.fn().mockResolvedValue({
       image: {
@@ -92,13 +109,13 @@ describe("ProductService", () => {
         mimetype: "image/png",
         size: "5mb",
       },
-      save: mockSave,
+      updateOne: update,
     });
 
     const upload = jest.spyOn(productService as any, "upload").mockReturnValue({
       fileName: "new-image",
       size: "3mb",
-      mimetype: "immage/png",
+      mimetype: "image/png",
       url: "https://mock.cloudinary.com/new-image.jpg",
     });
 
@@ -111,7 +128,7 @@ describe("ProductService", () => {
     expect(upload).toHaveBeenCalled();
     expect(upload).toHaveBeenCalledWith(mockFile, "old-image");
     expect(result.url).toBe("https://mock.cloudinary.com/new-image.jpg");
-    expect(mockSave).toHaveBeenCalled();
+    expect(update).toHaveBeenCalled();
   });
 
   test("return a product if found", async () => {
@@ -124,18 +141,27 @@ describe("ProductService", () => {
       },
     };
 
+    (Types.ObjectId.isValid as jest.Mock).mockReturnValue(true);
     const product = Product.findOne as jest.Mock;
     product.mockResolvedValue(mockValue);
 
     const getProduct = await productService.getSpecificProduct(id);
 
     expect(getProduct).toEqual(mockValue);
+  });
+
+  test("return a BadRequest error if ID isnt valid", async () => {
+    const id = "12346543";
+
+    (Types.ObjectId.isValid as jest.Mock).mockReturnValue(false);
+    expect(productService.getSpecificProduct(id)).rejects.toThrow(BadRequest);
     expect(ObjectId).toHaveBeenCalled();
   });
 
   test("return a NOTFOUND error if ID isnt valid", async () => {
     const id = "12346543";
 
+    (Types.ObjectId.isValid as jest.Mock).mockReturnValue(true);
     const product = Product.findOne as jest.Mock;
     product.mockRejectedValue(new NotFound("Product doesn't exist."));
 

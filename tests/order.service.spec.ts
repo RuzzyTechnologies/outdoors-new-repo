@@ -66,7 +66,7 @@ describe("OrderService", () => {
       .mockReturnValue({});
 
     const orderPayload = {
-      userId: "objectid-wwqwq",
+      userId: new ObjectId(),
       productId: "object-qwqr",
       dateRequested: "12/07/25",
       status: "Pending",
