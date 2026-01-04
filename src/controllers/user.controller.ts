@@ -26,7 +26,7 @@ export class UserController implements UC {
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: "#/components/schemas/UserlogRequest"
+   *             $ref: "#/components/schemas/CreateUserRequest"
    *     responses:
    *       201:
    *         description: User logged in successfully
@@ -142,7 +142,7 @@ export class UserController implements UC {
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: "#/components/schemas/UserLoginRequest"
+   *             $ref: "#/components/schemas/LoginUserRequest"
    *     responses:
    *       200:
    *         description: Login successful

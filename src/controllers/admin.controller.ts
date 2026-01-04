@@ -25,7 +25,7 @@ export class AdminController implements AC {
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: "#/components/schemas/LogAdminRequest"
+   *             $ref: "#/components/schemas/CreateAdminRequest"
    *     responses:
    *       201:
    *         description: Admin logged in successfully
@@ -390,7 +390,7 @@ export class AdminController implements AC {
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: "#/components/schemas/UpdatePasswordRequest"
+   *             $ref: "#/components/schemas/UpdateAdminPasswordRequest"
    *     responses:
    *       200:
    *         description: Admin updated successfully

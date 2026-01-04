@@ -62,41 +62,7 @@
  *           type: array
  *           items:
  *             type: string
- */
-
-/**
- * @openapi
- * /api/v1/locations/state:
- *   post:
- *     summary: Create a state
- *     description: Create a new state location
- *     tags:
- *       - Location
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: "#/components/schemas/CreateStateRequest"
- *     responses:
- *       201:
- *         description: State created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/LocationResponse"
- *       400:
- *         description: Invalid request payload
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/ErrorResponse"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/ErrorResponse"
+ *
  *     PaginationMeta:
  *       type: object
  *       properties:
